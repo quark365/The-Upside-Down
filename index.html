@@ -4,31 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Upside Down | Analog P2P</title>
-    
+   
     <!-- React & DOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>    
-    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+   
     <!-- Tailwind -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
+   
     <!-- QR Tools -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    
+   
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap');
-        
+       
         :root {
             --stranger-red: #ff0909;
             --stranger-dark: #080202;
             --flesh: #a35d5d;
         }
-
         body {
             background-color: var(--stranger-dark);
             color: #d1d5db;
@@ -36,13 +34,12 @@
             overflow: hidden;
             touch-action: manipulation;
         }
-
         /* The Upside Down Atmosphere */
         .app-bg {
             background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
             position: relative;
         }
-        
+       
         /* Spores / Dust Particles */
         .spores {
             position: fixed;
@@ -54,7 +51,6 @@
             animation: grain 8s steps(10) infinite;
         }
         @keyframes grain { 0%, 100% { transform:translate(0,0) } 10% { transform:translate(-5%,-5%) } 20% { transform:translate(-10%,5%) } 30% { transform:translate(5%,-10%) } 40% { transform:translate(-5%,15%) } 50% { transform:translate(-10%,5%) } 60% { transform:translate(15%,0) } 70% { transform:translate(0,10%) } 80% { transform:translate(-15%,0) } 90% { transform:translate(10%,5%) } }
-
         .floating-spore {
             position: fixed;
             background: rgba(255, 255, 255, 0.3);
@@ -64,7 +60,6 @@
             animation: float-up linear infinite;
         }
         @keyframes float-up { from { transform: translateY(100vh) scale(1); opacity: 0; } 50% { opacity: 0.8; } to { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
-
         .app-height {
             height: 100vh;
             height: 100dvh;
@@ -74,49 +69,42 @@
             position: relative;
             z-index: 10;
         }
-
         /* 80s Intro Title Font */
-        .font-title { 
-            font-family: 'Cinzel', serif; 
+        .font-title {
+            font-family: 'Cinzel', serif;
             text-transform: uppercase;
         }
-        
+       
         .stranger-text {
             color: transparent;
             -webkit-text-stroke: 1px var(--stranger-red);
             text-shadow: 0 0 10px rgba(255, 9, 9, 0.5);
             font-weight: 900;
         }
-
         .neon-border {
             box-shadow: 0 0 10px var(--stranger-red), inset 0 0 20px rgba(255, 9, 9, 0.1);
             border: 1px solid var(--stranger-red);
         }
-
         .glass-panel {
             background: rgba(10, 0, 0, 0.85);
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 9, 9, 0.3);
         }
-
         /* Utilities */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
         /* Messages */
         .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 4px; position: relative; word-break: break-word; line-height: 1.4; font-family: 'Courier Prime', monospace; }
         /* User: Red glow */
         .msg-me { background: rgba(80, 0, 0, 0.8); color: #ffcece; border: 1px solid var(--stranger-red); margin-left: auto; box-shadow: 0 0 10px rgba(255, 0, 0, 0.2); }
         /* Other: Dark void */
         .msg-other { background: #0f0f0f; color: #a0aec0; margin-right: auto; border: 1px solid #333; }
-        
+       
         .msg-sys { display: flex; justify-content: center; width: 100%; margin: 16px 0; opacity: 0.9; }
         .sys-pill { background: #000; color: var(--stranger-red); font-size: 10px; padding: 4px 12px; border: 1px solid var(--stranger-red); text-transform: uppercase; letter-spacing: 2px; }
-
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-
         /* Recording Pulse - Red Heartbeat */
         .pulse-ring {
             box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
@@ -125,7 +113,6 @@
         @keyframes pulse-red {
             to { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
         }
-
         /* Flashlight Effect for buttons */
         .flashlight:hover {
             box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.1);
@@ -134,42 +121,40 @@
     </style>
 </head>
 <body>
-    <div id="spore-container"></div>
     <div id="root"></div>
-
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo, useCallback } = React;
-
         // --- SPORE GENERATOR ---
         const SporeEffect = () => {
-            useEffect(() => {
-                const container = document.getElementById('spore-container');
-                const sporeCount = 20;
-                for (let i = 0; i < sporeCount; i++) {
-                    const el = document.createElement('div');
-                    el.classList.add('floating-spore');
-                    const size = Math.random() * 4 + 1;
-                    el.style.width = `${size}px`;
-                    el.style.height = `${size}px`;
-                    el.style.left = `${Math.random() * 100}vw`;
-                    el.style.animationDuration = `${Math.random() * 10 + 5}s`;
-                    el.style.animationDelay = `${Math.random() * 5}s`;
-                    container.appendChild(el);
-                }
-            }, []);
-            return <div className="spores"></div>;
+            return (
+                <>
+                    <div className="spores"></div>
+                    {Array.from({ length: 20 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="floating-spore"
+                            style={{
+                                width: `${Math.random() * 4 + 1}px`,
+                                height: `${Math.random() * 4 + 1}px`,
+                                left: `${Math.random() * 100}vw`,
+                                animationDuration: `${Math.random() * 10 + 5}s`,
+                                animationDelay: `${Math.random() * 5}s`,
+                            }}
+                        />
+                    ))}
+                </>
+            );
         };
-
         // --- CONFIG ---
         const CHUNK_SIZE = 250;
         const ICE_SERVERS = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        const FILE_CHUNK_SIZE = 16384; 
+        const FILE_CHUNK_SIZE = 16384;
         const EMOJIS = ["🧇", "🚲", "🔦", "📼", "👹", "🩸", "🎄", "🎸", "🎲", "🦇", "🤡", "🌲", "👃", "🥞", "📻", "⚡"];
-        
+       
         // --- UTILS ---
         const buf2hex = (buf) => [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
         const hex2buf = (hex) => new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16))).buffer;
-        
+       
         const arrayBufferToBase64 = (buffer) => {
             let binary = '';
             const bytes = new Uint8Array(buffer);
@@ -183,18 +168,14 @@
             for (let i = 0; i < len; i++) bytes[i] = binary_string.charCodeAt(i);
             return bytes.buffer;
         };
-
         const formatTime = (seconds) => {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
-
         // --- COMPONENTS ---
-
         const Icon = ({ name, size = 24, className, onClick }) => {
             const ref = useRef(null);
-
             useEffect(() => {
                 if(!window.lucide || !ref.current) return;
                 const el = document.createElement('i');
@@ -203,25 +184,23 @@
                 ref.current.appendChild(el);
                 window.lucide.createIcons({ root: ref.current, attrs: { width: size, height: size } });
             }, [name, size]);
-
             return (
-                <span 
-                    ref={ref} 
-                    onClick={onClick} 
+                <span
+                    ref={ref}
+                    onClick={onClick}
                     className={`inline-flex items-center justify-center ${className || ''}`}
                     style={{ cursor: onClick ? 'pointer' : 'default' }}
                 ></span>
             );
         };
-
         const QRAnimator = ({ data, label }) => {
             const [index, setIndex] = useState(0);
             const canvasRef = useRef(null);
-            
+           
             const chunks = useMemo(() => {
                 if(!data) return [];
                 const str = typeof data === 'string' ? data : JSON.stringify(data);
-                const b64 = btoa(str); 
+                const b64 = btoa(str);
                 const total = Math.ceil(b64.length / CHUNK_SIZE);
                 const arr = [];
                 for(let i=0; i<total; i++) {
@@ -229,7 +208,6 @@
                 }
                 return arr;
             }, [data]);
-
             useEffect(() => {
                 if(chunks.length <= 1) return;
                 const interval = setInterval(() => {
@@ -237,7 +215,6 @@
                 }, 250);
                 return () => clearInterval(interval);
             }, [chunks]);
-
             useEffect(() => {
                 if(canvasRef.current && chunks.length > 0) {
                     new QRious({
@@ -250,29 +227,25 @@
                     });
                 }
             }, [index, chunks]);
-
             return (
                 <div className="flex flex-col items-center bg-white p-2 border-4 border-red-600 shadow-[0_0_30px_rgba(255,0,0,0.4)]">
                     <canvas ref={canvasRef} className="mb-2"></canvas>
                     <div className="w-full bg-black h-2 overflow-hidden border border-red-900">
-                        <div className="h-full bg-red-600 transition-all duration-100" 
+                        <div className="h-full bg-red-600 transition-all duration-100"
                              style={{width: `${((index+1)/chunks.length)*100}%`}}></div>
                     </div>
                     <p className="text-black font-mono text-xs mt-2 font-bold uppercase tracking-widest">{label} ({index+1}/{chunks.length})</p>
                 </div>
             );
         };
-
         const QRScanner = ({ onScan }) => {
             const videoRef = useRef(null);
             const canvasRef = useRef(null);
             const [status, setStatus] = useState("TUNING CEREBRO...");
-
             const scanLoop = useCallback(() => {
                 const video = videoRef.current;
                 const canvas = canvasRef.current;
                 if(!video || !canvas) return;
-
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -280,7 +253,7 @@
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    
+                   
                     if (code && code.data.startsWith('SL:')) {
                         setStatus("SIGNAL LOCK ACQUIRED");
                         onScan(code.data);
@@ -290,7 +263,6 @@
                 }
                 requestAnimationFrame(scanLoop);
             }, [onScan]);
-
             useEffect(() => {
                 let stream = null;
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -305,7 +277,6 @@
                     .catch(err => setStatus("CAMERA ERROR: " + err.message));
                 return () => { if(stream) stream.getTracks().forEach(t => t.stop()); };
             }, [scanLoop]);
-
             return (
                 <div className="relative w-full max-w-sm aspect-square bg-black overflow-hidden border-4 border-red-600/50 shadow-2xl">
                     <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-70 grayscale contrast-125" muted playsInline></video>
@@ -322,7 +293,6 @@
                 </div>
             );
         };
-
         const IdentityModal = ({ fingerprint, onClose }) => {
             if (!fingerprint) return null;
             return (
@@ -347,57 +317,48 @@
                 </div>
             );
         };
-
         // --- CALL UI COMPONENT ---
         const CallOverlay = ({ status, localStream, remoteStream, onAnswer, onHangup, isVideo, onToggleMute, onToggleVideo }) => {
             const localVideoRef = useRef(null);
             const remoteVideoRef = useRef(null);
-            
+           
             const [isMuted, setIsMuted] = useState(false);
             const [isCameraOff, setIsCameraOff] = useState(false);
-
             useEffect(() => {
                 if (localVideoRef.current && localStream) {
                     localVideoRef.current.srcObject = localStream;
                 }
-            }, [localStream, isCameraOff]); 
-
+            }, [localStream, isCameraOff]);
             useEffect(() => {
                 if (remoteVideoRef.current && remoteStream) {
                     remoteVideoRef.current.srcObject = remoteStream;
                     remoteVideoRef.current.play().catch(e => console.log("Auto-play err", e));
                 }
             }, [remoteStream]);
-
             const handleMuteClick = () => {
                 const success = onToggleMute();
                 if(success) setIsMuted(prev => !prev);
             };
-
             const handleVideoClick = () => {
                 const success = onToggleVideo();
                 if(success) setIsCameraOff(prev => !prev);
             };
-
             if (status === 'IDLE') return null;
-
             const remoteHasVideo = remoteStream && remoteStream.getVideoTracks().length > 0;
-
             return (
                 <div className="fixed inset-0 z-[70] bg-black flex flex-col items-center justify-center w-screen h-screen">
-                    
+                   
                     {/* Main Video/Audio Container - Full Screen with Film Grain */}
                     <div className="relative w-full h-full flex items-center justify-center">
                         <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png')] opacity-20 pointer-events-none mix-blend-overlay z-10"></div>
-                        
+                       
                         {/* Remote Stream Layer */}
-                        <video 
-                            ref={remoteVideoRef} 
-                            autoPlay 
-                            playsInline 
-                            className="w-full h-full object-cover absolute inset-0 z-0 grayscale contrast-125 brightness-75 sepia-[.3]" 
+                        <video
+                            ref={remoteVideoRef}
+                            autoPlay
+                            playsInline
+                            className="w-full h-full object-cover absolute inset-0 z-0 grayscale contrast-125 brightness-75 sepia-[.3]"
                         />
-
                         {/* Audio-only Avatar Visualization */}
                         {!remoteHasVideo && (
                             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-black z-10">
@@ -412,14 +373,12 @@
                                 </p>
                             </div>
                         )}
-
                         {/* Local Video (PiP) */}
                         {localStream && isVideo && !isCameraOff && (
                             <div className="absolute top-6 right-6 w-32 h-48 sm:w-48 sm:h-64 bg-black border-2 border-red-800 z-20 shadow-2xl">
                                 <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1] grayscale contrast-125" />
                             </div>
                         )}
-
                         {/* Controls Overlay */}
                         <div className="absolute bottom-0 w-full p-8 pb-12 bg-gradient-to-t from-black via-black/80 to-transparent z-30 pb-safe">
                             <div className="max-w-md mx-auto">
@@ -432,7 +391,6 @@
                                         {status === 'ACTIVE' ? 'ENCRYPTED CHANNEL' : 'ESTABLISHING LINK...'}
                                     </div>
                                 </div>
-
                                 <div className="flex items-center justify-center gap-8">
                                     {status === 'INCOMING' ? (
                                         <>
@@ -442,7 +400,6 @@
                                                 </div>
                                                 <span className="text-xs font-bold text-red-500 uppercase tracking-wider">Close Gate</span>
                                             </button>
-
                                             <button onClick={onAnswer} className="flex flex-col items-center gap-2 group">
                                                 <div className="p-5 bg-red-700 text-white rounded-full shadow-[0_0_30px_rgba(255,0,0,0.6)] border border-red-500 group-hover:bg-red-600 group-hover:scale-110 transition-all animate-bounce">
                                                     <Icon name="phone" size={32} />
@@ -452,27 +409,26 @@
                                         </>
                                     ) : (
                                         <>
-                                            <button 
-                                                onClick={handleMuteClick} 
+                                            <button
+                                                onClick={handleMuteClick}
                                                 className={`p-5 rounded-full transition-all border shadow-lg ${
-                                                    isMuted 
-                                                        ? 'bg-red-900 border-red-500 text-white' 
+                                                    isMuted
+                                                        ? 'bg-red-900 border-red-500 text-white'
                                                         : 'bg-black border-gray-700 text-gray-300 hover:border-red-500 hover:text-red-500'
                                                 }`}
                                             >
                                                 <Icon key={isMuted ? "mic-off" : "mic"} name={isMuted ? "mic-off" : "mic"} size={28} />
                                             </button>
-                                            
+                                           
                                             <button onClick={onHangup} className="p-6 bg-red-700 rounded-full text-white shadow-[0_0_20px_rgba(255,0,0,0.5)] hover:bg-red-600 hover:scale-110 transition-all border-4 border-black">
                                                 <Icon name="phone-off" size={36} />
                                             </button>
-
                                             {isVideo && (
-                                                <button 
-                                                    onClick={handleVideoClick} 
+                                                <button
+                                                    onClick={handleVideoClick}
                                                     className={`p-5 rounded-full transition-all border shadow-lg ${
-                                                        isCameraOff 
-                                                            ? 'bg-red-900 border-red-500 text-white' 
+                                                        isCameraOff
+                                                            ? 'bg-red-900 border-red-500 text-white'
                                                             : 'bg-black border-gray-700 text-gray-300 hover:border-red-500 hover:text-red-500'
                                                     }`}
                                                 >
@@ -488,7 +444,6 @@
                 </div>
             );
         };
-
         // --- CAMERA COMPONENT ---
         const CameraModal = ({ onClose, onCapture }) => {
             const videoRef = useRef(null);
@@ -499,12 +454,11 @@
             const [isRecording, setIsRecording] = useState(false);
             const [preview, setPreview] = useState(null); // { type: 'image'|'video', url, blob }
             const [timer, setTimer] = useState(0);
-
             useEffect(() => {
                 let s = null;
-                navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" }, 
-                    audio: true 
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: true
                 }).then(mediaStream => {
                     s = mediaStream;
                     setStream(mediaStream);
@@ -515,7 +469,6 @@
                 }).catch(err => console.error("Cam Access Denied", err));
                 return () => { if(s) s.getTracks().forEach(t => t.stop()); }
             }, []);
-
             useEffect(() => {
                 let interval;
                 if(isRecording) {
@@ -525,7 +478,6 @@
                 }
                 return () => clearInterval(interval);
             }, [isRecording]);
-
             const takePhoto = () => {
                 if(!videoRef.current || !canvasRef.current) return;
                 const w = videoRef.current.videoWidth;
@@ -538,7 +490,6 @@
                     setPreview({ type: 'image', url: URL.createObjectURL(blob), blob });
                 }, 'image/jpeg', 0.85);
             };
-
             const toggleVideo = () => {
                 if(isRecording) {
                     mediaRecorderRef.current.stop();
@@ -556,7 +507,6 @@
                     setIsRecording(true);
                 }
             };
-
             const handleSend = () => {
                 if(preview) {
                     const name = preview.type === 'image' ? `photo_${Date.now()}.jpg` : `video_${Date.now()}.webm`;
@@ -565,11 +515,9 @@
                     onClose();
                 }
             };
-
             const retake = () => {
                 setPreview(null);
             };
-
             return (
                 <div className="fixed inset-0 z-[60] bg-black flex flex-col app-height items-center justify-center p-4">
                     <div className="w-full max-w-5xl h-full max-h-[90vh] flex flex-col relative bg-[#1a0505] rounded overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.2)] border-2 border-red-900">
@@ -579,7 +527,6 @@
                             {isRecording && <div className="text-red-500 font-mono font-bold animate-pulse bg-black/80 px-3 py-1 border border-red-600 tracking-widest">REC {formatTime(timer)}</div>}
                             <div className="w-8"></div>
                         </div>
-
                         {/* Main View */}
                         <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
                             {!preview ? (
@@ -598,14 +545,13 @@
                                 </>
                             ) : (
                                 <div className="relative w-full h-full bg-black flex items-center justify-center">
-                                    {preview.type === 'image' ? 
-                                        <img src={preview.url} className="max-w-full max-h-full object-contain grayscale" alt="preview" /> : 
+                                    {preview.type === 'image' ?
+                                        <img src={preview.url} className="max-w-full max-h-full object-contain grayscale" alt="preview" /> :
                                         <video src={preview.url} controls className="max-w-full max-h-full object-contain grayscale" />
                                     }
                                 </div>
                             )}
                         </div>
-
                         {/* Controls */}
                         <div className="bg-[#0a0000] border-t border-red-900 flex items-center justify-around pb-safe py-6">
                             {!preview ? (
@@ -614,7 +560,7 @@
                                         <button onClick={() => setMode('PHOTO')} className={`text-sm font-bold tracking-wider ${mode === 'PHOTO' ? 'text-red-500 underline underline-offset-4' : 'text-gray-600'} hover:text-red-400 transition-colors`}>PHOTO</button>
                                         <button onClick={() => setMode('VIDEO')} className={`text-sm font-bold tracking-wider ${mode === 'VIDEO' ? 'text-red-500 underline underline-offset-4' : 'text-gray-600'} hover:text-red-400 transition-colors`}>VIDEO</button>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={mode === 'PHOTO' ? takePhoto : toggleVideo}
                                         className={`w-16 h-16 rounded-full border-4 border-gray-400 flex items-center justify-center transition-all cursor-pointer hover:border-white ${isRecording ? 'border-red-500 scale-110' : 'active:scale-95'}`}
                                     >
@@ -633,7 +579,6 @@
                 </div>
             );
         };
-
         // --- MAIN APP ---
         const App = () => {
             const [view, setView] = useState('HOME');
@@ -642,21 +587,20 @@
             const [msgText, setMsgText] = useState("");
             const [messages, setMessages] = useState([]);
             const [showVerify, setShowVerify] = useState(false);
-            const [fileProgress, setFileProgress] = useState(0); 
+            const [fileProgress, setFileProgress] = useState(0);
             const [showCamera, setShowCamera] = useState(false);
             const [showEmoji, setShowEmoji] = useState(false);
-            
+           
             // Audio Recording State
             const [isRecordingAudio, setIsRecordingAudio] = useState(false);
             const [audioTimer, setAudioTimer] = useState(0);
             const audioRecorderRef = useRef(null);
             const audioChunksRef = useRef([]);
-
             // WebRTC Refs
             const pc = useRef(null);
             const dc = useRef(null);
             const candidates = useRef([]);
-            
+           
             // Crypto Refs
             const keys = useRef({ rsa: null, ecdh: null });
             const sessionKey = useRef(null);
@@ -664,12 +608,10 @@
             const incomingFiles = useRef({});
             const fileInputRef = useRef(null);
             const chatEndRef = useRef(null);
-
             // Signaling State
             const [localSignal, setLocalSignal] = useState(null);
             const scannedChunks = useRef(new Map());
             const [scanProgress, setScanProgress] = useState(0);
-
             // Call State
             const [callStatus, setCallStatus] = useState('IDLE'); // IDLE, OUTGOING, INCOMING, ACTIVE
             const [localStream, setLocalStream] = useState(null);
@@ -677,7 +619,6 @@
             const [remoteStream, setRemoteStream] = useState(null);
             const [isVideoCall, setIsVideoCall] = useState(false);
             const pendingOffer = useRef(null);
-
             // Initial Key Gen
             useEffect(() => {
                 const initKeys = async () => {
@@ -693,11 +634,9 @@
                 };
                 initKeys();
             }, []);
-
             useEffect(() => {
                 if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: "smooth" });
             }, [messages]);
-
             useEffect(() => {
                 let interval;
                 if(isRecordingAudio) {
@@ -707,20 +646,18 @@
                 }
                 return () => clearInterval(interval);
             }, [isRecordingAudio]);
-
             const addLog = (txt) => setLogs(p => [...p.slice(-4), txt]);
-
             // WebRTC Setup
             const createPeer = useCallback(() => {
                 const peer = new RTCPeerConnection(ICE_SERVERS);
-                peer.onicecandidate = (e) => { 
+                peer.onicecandidate = (e) => {
                     if (e.candidate) {
                         if (dc.current && dc.current.readyState === 'open') {
                              dc.current.send(JSON.stringify({ t: 'SIG_ICE', c: e.candidate }));
                         } else {
-                            candidates.current.push(e.candidate); 
+                            candidates.current.push(e.candidate);
                         }
-                    } 
+                    }
                 };
                 peer.onconnectionstatechange = () => addLog(`STATUS: ${peer.connectionState.toUpperCase()}`);
                 peer.ontrack = (e) => {
@@ -730,7 +667,6 @@
                 pc.current = peer;
                 return peer;
             }, []);
-
             const processSignal = useCallback(async (data) => {
                 if (!pc.current) return;
                 if(role === 'HOST' && data.type === 'answer') {
@@ -742,11 +678,10 @@
                     data.candidates.forEach(c => pc.current.addIceCandidate(new RTCIceCandidate(c)));
                     const answer = await pc.current.createAnswer();
                     await pc.current.setLocalDescription(answer);
-                    
+                   
                     // NEW: Wait longer for candidates to gather
-                    await new Promise(r => setTimeout(r, 2000)); 
+                    await new Promise(r => setTimeout(r, 2000));
                     addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
-
                     setLocalSignal({
                         type: 'answer',
                         sdp: pc.current.localDescription,
@@ -755,14 +690,12 @@
                     setView('JOIN_WAIT');
                 }
             }, [role]);
-
             const handleScannedChunk = useCallback((raw) => {
                 const parts = raw.split(':');
                 if(parts.length < 4) return;
                 const idx = parseInt(parts[1]);
                 const total = parseInt(parts[2]);
                 const data = parts.slice(3).join(':');
-
                 if(!scannedChunks.current.has(idx)) {
                     scannedChunks.current.set(idx, data);
                     setScanProgress(Math.round((scannedChunks.current.size / total) * 100));
@@ -781,7 +714,6 @@
                     }
                 }
             }, [processSignal]);
-
             const startHost = async () => {
                 setRole('HOST');
                 candidates.current = []; // NEW: Reset candidates
@@ -790,15 +722,13 @@
                 setupDataChannel(dc.current);
                 const offer = await peer.createOffer();
                 await peer.setLocalDescription(offer);
-                
+               
                 // NEW: Wait longer for candidates to gather
                 await new Promise(r => setTimeout(r, 2000));
                 addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
-
                 setLocalSignal({ type: 'offer', sdp: peer.localDescription, candidates: candidates.current });
                 setView('HOST_WAIT');
             };
-
             const startJoin = () => {
                 setRole('JOINER');
                 candidates.current = []; // NEW: Reset candidates
@@ -809,7 +739,6 @@
                 };
                 setView('SCAN_HOST');
             };
-
             const setupDataChannel = (channel) => {
                 channel.onopen = () => {
                     addLog("GATE OPENED.");
@@ -817,57 +746,51 @@
                 };
                 channel.onmessage = async (e) => handlePacket(e.data);
             };
-
             // Secure Handshake
             const initiateSecureHandshake = async () => {
                 const rsaPub = await window.crypto.subtle.exportKey("spki", keys.current.rsa.publicKey);
                 const ecdhPub = await window.crypto.subtle.exportKey("raw", keys.current.ecdh.publicKey);
                 dc.current.send(JSON.stringify({ t: 'HELLO', rsa: buf2hex(rsaPub), ecdh: buf2hex(ecdhPub) }));
             };
-
             const deriveSession = async (p) => {
                 const peerRsa = await window.crypto.subtle.importKey("spki", hex2buf(p.rsa), { name: "RSA-OAEP", hash: "SHA-256" }, true, ["encrypt"]);
                 const peerEcdh = await window.crypto.subtle.importKey("raw", hex2buf(p.ecdh), { name: "ECDH", namedCurve: "P-256" }, true, []);
-                
+               
                 const sharedBits = await window.crypto.subtle.deriveBits({ name: "ECDH", public: peerEcdh }, keys.current.ecdh.privateKey, 256);
-                
+               
                 const hkdfKey = await window.crypto.subtle.importKey("raw", sharedBits, { name: "HKDF" }, false, ["deriveKey"]);
                 sessionKey.current = await window.crypto.subtle.deriveKey(
                     { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(), info: new TextEncoder().encode("ShadowLink") },
                     hkdfKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
                 );
-
                 const localRsaExp = await window.crypto.subtle.exportKey("spki", keys.current.rsa.publicKey);
                 const remoteRsaExp = hex2buf(p.rsa);
-                
+               
                 const localArr = new Uint8Array(localRsaExp);
                 const remoteArr = new Uint8Array(remoteRsaExp);
                 let first = localArr, second = remoteArr;
-                
+               
                 for(let i=0; i<Math.min(localArr.length, remoteArr.length); i++) {
                     if (localArr[i] < remoteArr[i]) { first = localArr; second = remoteArr; break; }
                     if (localArr[i] > remoteArr[i]) { first = remoteArr; second = localArr; break; }
                 }
-
                 const totalLen = sharedBits.byteLength + first.length + second.length;
                 const combined = new Uint8Array(totalLen);
                 combined.set(new Uint8Array(sharedBits), 0);
                 combined.set(first, sharedBits.byteLength);
                 combined.set(second, sharedBits.byteLength + first.length);
-
                 const fpHash = await window.crypto.subtle.digest("SHA-256", combined);
                 const fpArr = new Uint8Array(fpHash);
-                const emojis = EMOJIS; 
+                const emojis = EMOJIS;
                 let fpEmoji = "";
                 for(let i=0; i<4; i++) fpEmoji += emojis[fpArr[i] % emojis.length];
                 const fpHex = buf2hex(fpHash).substring(0, 8).toUpperCase();
                 fingerprint.current = { emoji: fpEmoji, hex: fpHex };
-                
+               
                 addLog(`SIGNATURE: ${fpEmoji}`);
                 setView('CHAT');
                 setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `ENCRYPTED LINK ESTABLISHED` }]);
             };
-
             const handlePacket = async (raw) => {
                 try {
                     const p = JSON.parse(raw);
@@ -919,7 +842,7 @@
                                     );
                                     const blob = new Blob([fileData], { type: fileCtx.meta.type });
                                     const url = URL.createObjectURL(blob);
-                                    setMessages(prev => [...prev, { 
+                                    setMessages(prev => [...prev, {
                                         id: Date.now(), type: 'FILE', text: fileCtx.meta.name, fileUrl: url, fileSize: fileCtx.meta.size, mimeType: fileCtx.meta.type
                                     }]);
                                     delete incomingFiles.current[p.id];
@@ -932,7 +855,6 @@
                     }
                 } catch(e) { console.error("Packet Error", e); }
             };
-
             const decryptData = async (ivHex, dataHex) => {
                 return await window.crypto.subtle.decrypt(
                     { name: "AES-GCM", iv: hex2buf(ivHex) },
@@ -940,7 +862,6 @@
                     hex2buf(dataHex)
                 );
             };
-
             const sendMessage = async () => {
                 if(!msgText.trim() || !sessionKey.current) return;
                 const txt = msgText;
@@ -954,7 +875,6 @@
                 );
                 dc.current.send(JSON.stringify({ t: 'ENC', iv: buf2hex(iv), d: buf2hex(enc) }));
             };
-
             const processAndSendFile = async (blob, fileName, fileType) => {
                  if (!sessionKey.current) return;
                 const buffer = await blob.arrayBuffer();
@@ -971,7 +891,7 @@
                 for (let i = 0; i < totalChunks; i++) {
                     const chunk = encryptedFile.slice(offset, offset + FILE_CHUNK_SIZE);
                     const b64Chunk = arrayBufferToBase64(chunk);
-                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 10)); 
+                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 10));
                     dc.current.send(JSON.stringify({ t: 'FILE_CHUNK', id: fileId, idx: i, d: b64Chunk }));
                     offset += FILE_CHUNK_SIZE;
                     setFileProgress(Math.round(((i + 1) / totalChunks) * 100));
@@ -980,18 +900,16 @@
                 const localUrl = URL.createObjectURL(blob);
                 setMessages(prev => [...prev, { id: Date.now(), type: 'TX_FILE', text: fileName, fileUrl: localUrl, mimeType: fileType }]);
             };
-
             const handleFileSelect = (e) => {
                 const file = e.target.files[0];
                 if (file) processAndSendFile(file, file.name, file.type);
             };
-
             // --- CALLING LOGIC ---
             const startCall = async (video = false) => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: video });
                     setLocalStream(stream);
-                    localStreamRef.current = stream; 
+                    localStreamRef.current = stream;
                     setIsVideoCall(video);
                     stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
                     const offer = await pc.current.createOffer();
@@ -1003,7 +921,6 @@
                     alert("Could not access camera/microphone");
                 }
             };
-
             const answerCall = async () => {
                 try {
                     let stream;
@@ -1014,7 +931,7 @@
                         else throw e;
                     }
                     setLocalStream(stream);
-                    localStreamRef.current = stream; 
+                    localStreamRef.current = stream;
                     stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
                     await pc.current.setRemoteDescription(new RTCSessionDescription(pendingOffer.current));
                     const answer = await pc.current.createAnswer();
@@ -1023,12 +940,10 @@
                     setCallStatus('ACTIVE');
                 } catch(e) { console.error("Answer Error", e); }
             };
-
             const endCall = () => {
                 dc.current.send(JSON.stringify({ t: 'CALL_END' }));
                 endCallCleanup();
             };
-
             const endCallCleanup = () => {
                 if(localStreamRef.current) {
                     localStreamRef.current.getTracks().forEach(t => t.stop());
@@ -1039,7 +954,6 @@
                 setRemoteStream(null);
                 setCallStatus('IDLE');
             };
-
             const toggleMute = () => {
                 if(localStreamRef.current) {
                     const audioTrack = localStreamRef.current.getAudioTracks()[0];
@@ -1050,7 +964,6 @@
                 }
                 return false;
             };
-
             const toggleVideo = () => {
                 if(localStreamRef.current) {
                     const videoTrack = localStreamRef.current.getVideoTracks()[0];
@@ -1061,7 +974,6 @@
                 }
                 return false;
             };
-
             const startAudioRecord = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1078,17 +990,15 @@
                     setIsRecordingAudio(true);
                 } catch(e) { console.error("Mic Error", e); }
             };
-
             const stopAudioRecord = () => {
                 if(audioRecorderRef.current && isRecordingAudio) {
                     audioRecorderRef.current.stop();
                     setIsRecordingAudio(false);
                 }
             };
-
             const renderMediaContent = (m) => {
                 const type = m.mimeType || '';
-                const mediaStyle = "rounded border border-red-900 bg-black/50 mt-2 max-h-64 object-contain grayscale hover:grayscale-0 transition-all"; 
+                const mediaStyle = "rounded border border-red-900 bg-black/50 mt-2 max-h-64 object-contain grayscale hover:grayscale-0 transition-all";
                 if (type.startsWith('image/')) {
                     return (<a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="block cursor-pointer"><img src={m.fileUrl} className={mediaStyle} alt="content" /></a>);
                 } else if (type.startsWith('video/')) {
@@ -1098,7 +1008,6 @@
                 }
                 return (<a href={m.fileUrl} download={m.text} className="mt-2 flex items-center justify-center gap-2 w-full py-2 bg-red-900/40 hover:bg-red-900 border border-red-800 text-red-200 text-xs font-bold transition-colors font-mono uppercase"><Icon name="download" size={14} /> Download Evidence</a>);
             };
-
             const renderHome = () => (
                 <div className="flex flex-col items-center justify-center app-height p-6 space-y-12 animate-fade-in app-bg">
                     <div className="w-full max-w-2xl mx-auto space-y-10 relative z-10">
@@ -1112,15 +1021,23 @@
                             <p className="text-red-500/70 text-sm font-mono tracking-[0.2em] uppercase">Analog Interface • P2P Gateway</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-                            <button onClick={startHost} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60">
-                                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-50 transition-opacity"><Icon name="radio-tower" size={64} className="text-red-600" /></div>
-                                <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">OPEN GATE</h3>
-                                <p className="text-xs text-gray-500 font-mono uppercase">Start a new frequency for others to find.</p>
+                            <button onClick={startHost} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60 flex items-center justify-between gap-6">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">OPEN GATE</h3>
+                                    <p className="text-xs text-gray-500 font-mono uppercase max-w-[160px]">Start a new frequency for others to find.</p>
+                                </div>
+                                <div className="opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
+                                    <Icon name="radio-tower" size={56} className="text-red-600" />
+                                </div>
                             </button>
-                            <button onClick={startJoin} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60">
-                                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-50 transition-opacity"><Icon name="search" size={64} className="text-red-600" /></div>
-                                <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">FIND BREACH</h3>
-                                <p className="text-xs text-gray-500 font-mono uppercase">Scan for existing rifts nearby.</p>
+                            <button onClick={startJoin} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60 flex items-center justify-between gap-6">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">FIND BREACH</h3>
+                                    <p className="text-xs text-gray-500 font-mono uppercase max-w-[160px]">Scan for existing rifts nearby.</p>
+                                </div>
+                                <div className="opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
+                                    <Icon name="search" size={56} className="text-red-600" />
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -1130,7 +1047,6 @@
                     </div>
                 </div>
             );
-
             const renderSignaling = () => {
                 const isScanner = view === 'SCAN_HOST' || view === 'SCAN_JOIN';
                 const isQR = view === 'HOST_WAIT' || view === 'JOIN_WAIT';
@@ -1162,7 +1078,6 @@
                     </div>
                 );
             };
-
             const renderChat = () => (
                 <div className="app-height bg-[#050505] flex flex-col overflow-hidden relative">
                     <header className="px-6 py-4 bg-black border-b border-red-900 flex items-center justify-between shadow-lg z-10 shrink-0">
@@ -1186,7 +1101,7 @@
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black relative scroll-smooth">
                         {/* Background Texture */}
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-felt.png')] opacity-30 pointer-events-none"></div>
-                        
+                       
                         <div className="max-w-4xl mx-auto w-full space-y-4 relative z-10">
                             {messages.map((m) => (m.type === 'SYS' ? (<div key={m.id} className="msg-sys"><span className="sys-pill">{m.text}</span></div>) : (<div key={m.id} className={`flex ${['TX', 'TX_FILE'].includes(m.type) ? 'justify-end' : 'justify-start'} animate-fade-in`}><div className={`msg-bubble ${['TX', 'TX_FILE'].includes(m.type) ? 'msg-me' : 'msg-other'} text-sm ${['FILE', 'TX_FILE'].includes(m.type) ? 'min-w-[240px]' : 'min-w-[60px]'}`}>{['FILE', 'TX_FILE'].includes(m.type) ? (<><div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10"><Icon name={m.mimeType?.startsWith('image') ? 'image' : m.mimeType?.startsWith('video') ? 'video' : m.mimeType?.startsWith('audio') ? 'mic' : 'file'} size={14} className="opacity-70" /><span className="font-bold text-xs opacity-90 truncate max-w-[150px] font-mono uppercase">{m.text}</span></div>{renderMediaContent(m)}</>) : (m.text)}<div className="text-[9px] mt-1.5 opacity-50 text-right font-mono flex justify-end gap-1 items-center uppercase">{new Date(m.id).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}{['TX', 'TX_FILE'].includes(m.type) && <span className="text-red-500 font-bold">SENT</span>}</div></div></div>)))}
                             <div ref={chatEndRef}></div>
@@ -1204,12 +1119,10 @@
                     {callStatus !== 'IDLE' && (<CallOverlay status={callStatus} localStream={localStream} remoteStream={remoteStream} isVideo={isVideoCall} onAnswer={answerCall} onHangup={endCall} onToggleMute={toggleMute} onToggleVideo={toggleVideo} />)}
                 </div>
             );
-
             if(view === 'HOME') return <><SporeEffect />{renderHome()}</>;
             if(view === 'CHAT') return <><SporeEffect />{renderChat()}</>;
             return <><SporeEffect />{renderSignaling()}</>;
         };
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
