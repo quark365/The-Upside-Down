@@ -742,7 +742,11 @@
                     data.candidates.forEach(c => pc.current.addIceCandidate(new RTCIceCandidate(c)));
                     const answer = await pc.current.createAnswer();
                     await pc.current.setLocalDescription(answer);
-                    await new Promise(r => setTimeout(r, 500)); 
+                    
+                    // NEW: Wait longer for candidates to gather
+                    await new Promise(r => setTimeout(r, 2000)); 
+                    addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
+
                     setLocalSignal({
                         type: 'answer',
                         sdp: pc.current.localDescription,
@@ -780,18 +784,24 @@
 
             const startHost = async () => {
                 setRole('HOST');
+                candidates.current = []; // NEW: Reset candidates
                 const peer = createPeer();
                 dc.current = peer.createDataChannel("upsidedown");
                 setupDataChannel(dc.current);
                 const offer = await peer.createOffer();
                 await peer.setLocalDescription(offer);
-                await new Promise(r => setTimeout(r, 500));
+                
+                // NEW: Wait longer for candidates to gather
+                await new Promise(r => setTimeout(r, 2000));
+                addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
+
                 setLocalSignal({ type: 'offer', sdp: peer.localDescription, candidates: candidates.current });
                 setView('HOST_WAIT');
             };
 
             const startJoin = () => {
                 setRole('JOINER');
+                candidates.current = []; // NEW: Reset candidates
                 const peer = createPeer();
                 peer.ondatachannel = (e) => {
                     dc.current = e.channel;
