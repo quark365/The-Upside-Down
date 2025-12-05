@@ -126,24 +126,26 @@
         const { useState, useEffect, useRef, useMemo, useCallback } = React;
         // --- SPORE GENERATOR ---
         const SporeEffect = () => {
-            return (
-                <>
-                    <div className="spores"></div>
-                    {Array.from({ length: 20 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="floating-spore"
-                            style={{
-                                width: `${Math.random() * 4 + 1}px`,
-                                height: `${Math.random() * 4 + 1}px`,
-                                left: `${Math.random() * 100}vw`,
-                                animationDuration: `${Math.random() * 10 + 5}s`,
-                                animationDelay: `${Math.random() * 5}s`,
-                            }}
-                        />
-                    ))}
-                </>
-            );
+            useEffect(() => {
+                const container = document.body; // Use body as container for fixed elements
+                const sporeCount = 20;
+                for (let i = 0; i < sporeCount; i++) {
+                    const el = document.createElement('div');
+                    el.classList.add('floating-spore');
+                    const size = Math.random() * 4 + 1;
+                    el.style.width = `${size}px`;
+                    el.style.height = `${size}px`;
+                    el.style.left = `${Math.random() * 100}vw`;
+                    el.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                    el.style.animationDelay = `${Math.random() * 5}s`;
+                    container.appendChild(el);
+                }
+                return () => {
+                    // Cleanup on unmount
+                    document.querySelectorAll('.floating-spore').forEach(el => el.remove());
+                };
+            }, []);
+            return <div className="spores"></div>;
         };
         // --- CONFIG ---
         const CHUNK_SIZE = 250;
@@ -679,8 +681,8 @@
                     const answer = await pc.current.createAnswer();
                     await pc.current.setLocalDescription(answer);
                    
-                    // NEW: Wait longer for candidates to gather
-                    await new Promise(r => setTimeout(r, 2000));
+                    // Match ShadowLink delay
+                    await new Promise(r => setTimeout(r, 500));
                     addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
                     setLocalSignal({
                         type: 'answer',
@@ -716,22 +718,22 @@
             }, [processSignal]);
             const startHost = async () => {
                 setRole('HOST');
-                candidates.current = []; // NEW: Reset candidates
+                // Remove explicit reset to match ShadowLink
                 const peer = createPeer();
                 dc.current = peer.createDataChannel("upsidedown");
                 setupDataChannel(dc.current);
                 const offer = await peer.createOffer();
                 await peer.setLocalDescription(offer);
                
-                // NEW: Wait longer for candidates to gather
-                await new Promise(r => setTimeout(r, 2000));
+                // Match ShadowLink delay
+                await new Promise(r => setTimeout(r, 500));
                 addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
                 setLocalSignal({ type: 'offer', sdp: peer.localDescription, candidates: candidates.current });
                 setView('HOST_WAIT');
             };
             const startJoin = () => {
                 setRole('JOINER');
-                candidates.current = []; // NEW: Reset candidates
+                // Remove explicit reset to match ShadowLink
                 const peer = createPeer();
                 peer.ondatachannel = (e) => {
                     dc.current = e.channel;
