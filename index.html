@@ -3,63 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>The Upside Down | Analog P2P</title>
-   
+    <title>Upside Down | Secure P2P</title>
+    
     <!-- React & DOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-   
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>    
+    
     <!-- Tailwind -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-   
+    
     <!-- QR Tools -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-   
+    
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap');
-       
+        /* Import Fonts: Serif for titles (Benguiat-ish), Mono for data */
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Merriweather:wght@900&family=VT323&display=swap');
+        
         :root {
-            --stranger-red: #ff0909;
-            --stranger-dark: #080202;
-            --flesh: #a35d5d;
+            --st-red: #ff1515;
+            --st-dark-red: #8a0000;
+            --bg-dark: #050205;
+            --ash-color: rgba(200, 200, 200, 0.4);
         }
+
         body {
-            background-color: var(--stranger-dark);
+            background-color: var(--bg-dark);
             color: #d1d5db;
-            font-family: 'Courier Prime', monospace; /* Typewriter style */
+            font-family: 'VT323', monospace; /* Retro terminal font */
             overflow: hidden;
             touch-action: manipulation;
         }
-        /* The Upside Down Atmosphere */
-        .app-bg {
-            background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
-            position: relative;
+
+        /* Title Font */
+        .font-title {
+            font-family: 'Merriweather', serif;
+            letter-spacing: -1px;
         }
-       
-        /* Spores / Dust Particles */
-        .spores {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.4;
-            animation: grain 8s steps(10) infinite;
+
+        .st-glow {
+            text-shadow: 
+                0 0 5px var(--st-dark-red),
+                0 0 10px var(--st-dark-red),
+                0 0 20px var(--st-red);
         }
-        @keyframes grain { 0%, 100% { transform:translate(0,0) } 10% { transform:translate(-5%,-5%) } 20% { transform:translate(-10%,5%) } 30% { transform:translate(5%,-10%) } 40% { transform:translate(-5%,15%) } 50% { transform:translate(-10%,5%) } 60% { transform:translate(15%,0) } 70% { transform:translate(0,10%) } 80% { transform:translate(-15%,0) } 90% { transform:translate(10%,5%) } }
-        .floating-spore {
-            position: fixed;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 2;
-            animation: float-up linear infinite;
+        
+        .st-box-shadow {
+            box-shadow: 0 0 15px rgba(255, 21, 21, 0.2);
         }
-        @keyframes float-up { from { transform: translateY(100vh) scale(1); opacity: 0; } 50% { opacity: 0.8; } to { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+
         .app-height {
             height: 100vh;
             height: 100dvh;
@@ -67,96 +63,151 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            z-index: 10;
         }
-        /* 80s Intro Title Font */
-        .font-title {
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
+
+        /* Atmosphere: Film Grain & Vignette */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
         }
-       
-        .stranger-text {
-            color: transparent;
-            -webkit-text-stroke: 1px var(--stranger-red);
-            text-shadow: 0 0 10px rgba(255, 9, 9, 0.5);
-            font-weight: 900;
+        .grain {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.15;
         }
-        .neon-border {
-            box-shadow: 0 0 10px var(--stranger-red), inset 0 0 20px rgba(255, 9, 9, 0.1);
-            border: 1px solid var(--stranger-red);
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 50%, #000 100%);
+            opacity: 0.8;
         }
+
+        /* Floating Ash Particles */
+        .ash-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .ash {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--ash-color);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
+        }
+
+        /* Red Scanline */
+        .scanline {
+            width: 100%; height: 3px;
+            background: rgba(255, 0, 0, 0.5);
+            position: absolute;
+            animation: scan 3s linear infinite;
+            box-shadow: 0 0 10px var(--st-red);
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        /* UI Panels */
         .glass-panel {
-            background: rgba(10, 0, 0, 0.85);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 9, 9, 0.3);
+            background: rgba(20, 10, 20, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 50, 50, 0.2);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
+
         /* Utilities */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        /* Messages */
-        .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 4px; position: relative; word-break: break-word; line-height: 1.4; font-family: 'Courier Prime', monospace; }
-        /* User: Red glow */
-        .msg-me { background: rgba(80, 0, 0, 0.8); color: #ffcece; border: 1px solid var(--stranger-red); margin-left: auto; box-shadow: 0 0 10px rgba(255, 0, 0, 0.2); }
-        /* Other: Dark void */
-        .msg-other { background: #0f0f0f; color: #a0aec0; margin-right: auto; border: 1px solid #333; }
-       
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* Chat Bubbles */
+        .msg-bubble { 
+            max-width: 85%; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            position: relative; 
+            word-break: break-word; 
+            line-height: 1.4;
+            font-size: 1.1rem;
+        }
+        .msg-me { 
+            background: rgba(139, 0, 0, 0.6); /* Dark Red */
+            color: #ffd1d1; 
+            border-right: 3px solid var(--st-red);
+            margin-left: auto; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+        }
+        .msg-other { 
+            background: rgba(30, 30, 40, 0.8); 
+            color: #d1d5db; 
+            border-left: 3px solid #555;
+            margin-right: auto; 
+        }
+        
+        /* System Pills */
         .msg-sys { display: flex; justify-content: center; width: 100%; margin: 16px 0; opacity: 0.9; }
-        .sys-pill { background: #000; color: var(--stranger-red); font-size: 10px; padding: 4px 12px; border: 1px solid var(--stranger-red); text-transform: uppercase; letter-spacing: 2px; }
+        .sys-pill { 
+            background: #000; 
+            color: var(--st-red); 
+            font-size: 14px; 
+            padding: 4px 12px; 
+            border: 1px solid var(--st-red);
+            box-shadow: 0 0 5px var(--st-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        /* Recording Pulse - Red Heartbeat */
+
+        /* Recording Pulse (Red) */
         .pulse-ring {
-            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
             animation: pulse-red 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
         }
         @keyframes pulse-red {
-            to { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+            to { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
         }
-        /* Flashlight Effect for buttons */
-        .flashlight:hover {
-            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.1);
-            background-color: rgba(255, 9, 9, 0.1);
+
+        /* Flicker Animation */
+        .flicker { animation: flicker 3s infinite; }
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 0.99; }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; }
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo, useCallback } = React;
-        // --- SPORE GENERATOR ---
-        const SporeEffect = () => {
-            useEffect(() => {
-                const container = document.body; // Use body as container for fixed elements
-                const sporeCount = 20;
-                for (let i = 0; i < sporeCount; i++) {
-                    const el = document.createElement('div');
-                    el.classList.add('floating-spore');
-                    const size = Math.random() * 4 + 1;
-                    el.style.width = `${size}px`;
-                    el.style.height = `${size}px`;
-                    el.style.left = `${Math.random() * 100}vw`;
-                    el.style.animationDuration = `${Math.random() * 10 + 5}s`;
-                    el.style.animationDelay = `${Math.random() * 5}s`;
-                    container.appendChild(el);
-                }
-                return () => {
-                    // Cleanup on unmount
-                    document.querySelectorAll('.floating-spore').forEach(el => el.remove());
-                };
-            }, []);
-            return <div className="spores"></div>;
-        };
+
         // --- CONFIG ---
         const CHUNK_SIZE = 250;
         const ICE_SERVERS = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        const FILE_CHUNK_SIZE = 16384;
-        const EMOJIS = ["🧇", "🚲", "🔦", "📼", "👹", "🩸", "🎄", "🎸", "🎲", "🦇", "🤡", "🌲", "👃", "🥞", "📻", "⚡"];
-       
+        const FILE_CHUNK_SIZE = 16384; 
+        const EMOJIS = ["👍", "❤️", "🚲", "🔦", "🧇", "🎲", "👹", "🩸", "🌲", "📻", "👽", "👻", "🧟", "🕸️", "⚡", "🔥"];
+        
         // --- UTILS ---
         const buf2hex = (buf) => [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
         const hex2buf = (hex) => new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16))).buffer;
-       
+        
         const arrayBufferToBase64 = (buffer) => {
             let binary = '';
             const bytes = new Uint8Array(buffer);
@@ -170,14 +221,35 @@
             for (let i = 0; i < len; i++) bytes[i] = binary_string.charCodeAt(i);
             return bytes.buffer;
         };
+
         const formatTime = (seconds) => {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
+
+        // --- ASH PARTICLES COMPONENT ---
+        const AshParticles = () => {
+            const particles = Array.from({ length: 30 });
+            return (
+                <div className="ash-container">
+                    {particles.map((_, i) => (
+                        <div key={i} className="ash" style={{
+                            left: `${Math.random() * 100}%`,
+                            animationDelay: `${Math.random() * 5}s`,
+                            animationDuration: `${5 + Math.random() * 10}s`,
+                            opacity: Math.random() * 0.7
+                        }}></div>
+                    ))}
+                </div>
+            );
+        };
+
         // --- COMPONENTS ---
+
         const Icon = ({ name, size = 24, className, onClick }) => {
             const ref = useRef(null);
+
             useEffect(() => {
                 if(!window.lucide || !ref.current) return;
                 const el = document.createElement('i');
@@ -186,23 +258,25 @@
                 ref.current.appendChild(el);
                 window.lucide.createIcons({ root: ref.current, attrs: { width: size, height: size } });
             }, [name, size]);
+
             return (
-                <span
-                    ref={ref}
-                    onClick={onClick}
+                <span 
+                    ref={ref} 
+                    onClick={onClick} 
                     className={`inline-flex items-center justify-center ${className || ''}`}
                     style={{ cursor: onClick ? 'pointer' : 'default' }}
                 ></span>
             );
         };
+
         const QRAnimator = ({ data, label }) => {
             const [index, setIndex] = useState(0);
             const canvasRef = useRef(null);
-           
+            
             const chunks = useMemo(() => {
                 if(!data) return [];
                 const str = typeof data === 'string' ? data : JSON.stringify(data);
-                const b64 = btoa(str);
+                const b64 = btoa(str); 
                 const total = Math.ceil(b64.length / CHUNK_SIZE);
                 const arr = [];
                 for(let i=0; i<total; i++) {
@@ -210,6 +284,7 @@
                 }
                 return arr;
             }, [data]);
+
             useEffect(() => {
                 if(chunks.length <= 1) return;
                 const interval = setInterval(() => {
@@ -217,6 +292,7 @@
                 }, 250);
                 return () => clearInterval(interval);
             }, [chunks]);
+
             useEffect(() => {
                 if(canvasRef.current && chunks.length > 0) {
                     new QRious({
@@ -225,29 +301,33 @@
                         size: 250,
                         level: 'L',
                         foreground: '#000',
-                        background: '#fff'
+                        background: '#e5e7eb' // Light gray instead of pure white for retro feel
                     });
                 }
             }, [index, chunks]);
+
             return (
-                <div className="flex flex-col items-center bg-white p-2 border-4 border-red-600 shadow-[0_0_30px_rgba(255,0,0,0.4)]">
-                    <canvas ref={canvasRef} className="mb-2"></canvas>
-                    <div className="w-full bg-black h-2 overflow-hidden border border-red-900">
-                        <div className="h-full bg-red-600 transition-all duration-100"
+                <div className="flex flex-col items-center bg-zinc-900 p-4 border-2 border-red-900 rounded-sm shadow-[0_0_20px_rgba(255,0,0,0.3)]">
+                    <canvas ref={canvasRef} className="rounded-sm mb-2 opacity-90 sepia-[.3]"></canvas>
+                    <div className="w-full bg-black h-2 rounded-none overflow-hidden border border-red-900">
+                        <div className="h-full bg-red-600 transition-all duration-100" 
                              style={{width: `${((index+1)/chunks.length)*100}%`}}></div>
                     </div>
-                    <p className="text-black font-mono text-xs mt-2 font-bold uppercase tracking-widest">{label} ({index+1}/{chunks.length})</p>
+                    <p className="text-red-500 font-mono text-lg mt-2 font-bold tracking-widest">{label} ({index+1}/{chunks.length})</p>
                 </div>
             );
         };
+
         const QRScanner = ({ onScan }) => {
             const videoRef = useRef(null);
             const canvasRef = useRef(null);
-            const [status, setStatus] = useState("TUNING CEREBRO...");
+            const [status, setStatus] = useState("SEARCHING FREQUENCY...");
+
             const scanLoop = useCallback(() => {
                 const video = videoRef.current;
                 const canvas = canvasRef.current;
                 if(!video || !canvas) return;
+
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -255,9 +335,9 @@
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
-                   
+                    
                     if (code && code.data.startsWith('SL:')) {
-                        setStatus("SIGNAL LOCK ACQUIRED");
+                        setStatus("SIGNAL LOCKED");
                         onScan(code.data);
                     } else {
                         setStatus("SEARCHING FREQUENCY...");
@@ -265,6 +345,7 @@
                 }
                 requestAnimationFrame(scanLoop);
             }, [onScan]);
+
             useEffect(() => {
                 let stream = null;
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -276,162 +357,175 @@
                             requestAnimationFrame(scanLoop);
                         }
                     })
-                    .catch(err => setStatus("CAMERA ERROR: " + err.message));
+                    .catch(err => setStatus("NO CAMERA FEED"));
                 return () => { if(stream) stream.getTracks().forEach(t => t.stop()); };
             }, [scanLoop]);
+
             return (
-                <div className="relative w-full max-w-sm aspect-square bg-black overflow-hidden border-4 border-red-600/50 shadow-2xl">
-                    <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-70 grayscale contrast-125" muted playsInline></video>
+                <div className="relative w-full max-w-sm aspect-square bg-black overflow-hidden border-4 border-red-900 shadow-2xl">
+                    <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-60 sepia contrast-125" muted playsInline></video>
                     <canvas ref={canvasRef} className="hidden"></canvas>
-                    {/* Retro Crosshair */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                         <div className="w-48 h-48 border border-red-500/30 rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                         </div>
-                    </div>
+                    <div className="scanline"></div>
+                    {/* Retro Camera Overlay */}
+                    <div className="absolute top-4 left-4 text-red-500 font-mono text-xl animate-pulse">REC ●</div>
                     <div className="absolute bottom-4 left-0 right-0 text-center">
-                        <span className={`text-xs px-3 py-1 font-mono uppercase tracking-widest ${status.includes("LOCK") ? "bg-red-600 text-black font-bold" : "bg-black text-red-500 border border-red-500"}`}>{status}</span>
+                        <span className={`text-lg px-4 py-1 font-mono font-bold tracking-widest transition-colors ${status === "SIGNAL LOCKED" ? "bg-red-600 text-black" : "bg-black text-red-500 border border-red-900"}`}>{status}</span>
                     </div>
                 </div>
             );
         };
+
         const IdentityModal = ({ fingerprint, onClose }) => {
             if (!fingerprint) return null;
             return (
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 fade-in">
-                    <div className="bg-[#100] border-2 border-red-600 p-8 max-w-sm w-full text-center relative shadow-[0_0_50px_rgba(255,0,0,0.3)]">
+                    <div className="bg-zinc-900 border-2 border-red-800 p-8 max-w-sm w-full text-center relative shadow-[0_0_50px_rgba(200,0,0,0.2)]">
                         <button onClick={onClose} className="absolute top-2 right-2 p-2 text-red-500 hover:text-white">
                             <Icon name="x" size={24} />
                         </button>
-                        <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-600 animate-pulse">
+                        <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500 animate-pulse">
                             <Icon name="fingerprint" size={32} className="text-red-500" />
                         </div>
-                        <h3 className="text-2xl font-bold text-red-500 mb-1 font-title">TRUE SIGHT</h3>
-                        <p className="text-gray-400 text-sm mb-6 font-mono uppercase tracking-wider">Friends Don't Lie. Verify.</p>
-                        <div className="bg-black p-6 border border-red-900 mb-6 relative overflow-hidden">
-                             {/* Glitch effect bg */}
-                             <div className="absolute inset-0 bg-red-500/5 mix-blend-overlay"></div>
-                            <div className="text-5xl mb-4 tracking-widest relative z-10 drop-shadow-lg">{fingerprint.emoji}</div>
-                            <div className="font-mono text-red-400 text-lg tracking-[0.2em] break-all relative z-10 border-t border-red-900 pt-2">{fingerprint.hex}</div>
+                        <h3 className="text-2xl font-bold text-red-500 mb-2 font-title tracking-wide uppercase">ID Verification</h3>
+                        <p className="text-zinc-500 text-lg mb-6 font-mono">Confirm peer signature.</p>
+                        <div className="bg-black p-6 border border-red-900 mb-6">
+                            <div className="text-5xl mb-4 tracking-widest filter drop-shadow-[0_0_5px_rgba(255,0,0,0.8)]">{fingerprint.emoji}</div>
+                            <div className="font-mono text-red-400 text-xl tracking-[0.2em] break-all">{fingerprint.hex}</div>
                         </div>
-                        <button onClick={onClose} className="w-full py-3 bg-red-700 hover:bg-red-600 border border-red-500 font-bold text-white transition-colors font-mono uppercase tracking-widest">Confirmed</button>
+                        <button onClick={onClose} className="w-full py-3 bg-red-900 hover:bg-red-700 border border-red-500 text-red-100 font-bold text-xl uppercase tracking-widest transition-colors font-mono">Verified</button>
                     </div>
                 </div>
             );
         };
+
         // --- CALL UI COMPONENT ---
         const CallOverlay = ({ status, localStream, remoteStream, onAnswer, onHangup, isVideo, onToggleMute, onToggleVideo }) => {
             const localVideoRef = useRef(null);
             const remoteVideoRef = useRef(null);
-           
+            
             const [isMuted, setIsMuted] = useState(false);
             const [isCameraOff, setIsCameraOff] = useState(false);
+
             useEffect(() => {
                 if (localVideoRef.current && localStream) {
                     localVideoRef.current.srcObject = localStream;
                 }
-            }, [localStream, isCameraOff]);
+            }, [localStream, isCameraOff]); 
+
             useEffect(() => {
                 if (remoteVideoRef.current && remoteStream) {
                     remoteVideoRef.current.srcObject = remoteStream;
                     remoteVideoRef.current.play().catch(e => console.log("Auto-play err", e));
                 }
             }, [remoteStream]);
+
             const handleMuteClick = () => {
                 const success = onToggleMute();
                 if(success) setIsMuted(prev => !prev);
             };
+
             const handleVideoClick = () => {
                 const success = onToggleVideo();
                 if(success) setIsCameraOff(prev => !prev);
             };
+
             if (status === 'IDLE') return null;
+
             const remoteHasVideo = remoteStream && remoteStream.getVideoTracks().length > 0;
+
             return (
                 <div className="fixed inset-0 z-[70] bg-black flex flex-col items-center justify-center w-screen h-screen">
-                   
-                    {/* Main Video/Audio Container - Full Screen with Film Grain */}
+                    
+                    {/* Atmosphere */}
+                    <div className="atmosphere"><div className="grain"></div><div className="vignette"></div></div>
+
+                    {/* Main Video/Audio Container - Full Screen */}
                     <div className="relative w-full h-full flex items-center justify-center">
-                        <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png')] opacity-20 pointer-events-none mix-blend-overlay z-10"></div>
-                       
+                        
                         {/* Remote Stream Layer */}
-                        <video
-                            ref={remoteVideoRef}
-                            autoPlay
-                            playsInline
-                            className="w-full h-full object-cover absolute inset-0 z-0 grayscale contrast-125 brightness-75 sepia-[.3]"
+                        <video 
+                            ref={remoteVideoRef} 
+                            autoPlay 
+                            playsInline 
+                            className="w-full h-full object-cover absolute inset-0 z-0 opacity-80 contrast-125 sepia-[0.4]" 
                         />
+
                         {/* Audio-only Avatar Visualization */}
                         {!remoteHasVideo && (
                             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-black z-10">
                                 <div className="relative">
                                     <div className={`absolute inset-0 bg-red-600 rounded-full blur-3xl opacity-20 ${status === 'ACTIVE' ? 'animate-pulse' : ''}`}></div>
-                                    <div className="w-40 h-40 rounded-full border-2 border-red-600/50 flex items-center justify-center relative z-10 shadow-[0_0_50px_rgba(255,0,0,0.3)] bg-black">
-                                        <Icon name="radio" size={60} className="text-red-500" />
+                                    <div className="w-48 h-48 rounded-full border-4 border-red-900 bg-black flex items-center justify-center relative z-10 shadow-[0_0_50px_rgba(255,0,0,0.3)]">
+                                        <Icon name="radio" size={80} className="text-red-500" />
                                     </div>
                                 </div>
-                                <p className="text-red-500 font-mono tracking-[0.5em] text-sm uppercase mt-8 animate-pulse">
-                                    {status === 'ACTIVE' ? 'SIGNAL CONNECTED' : status === 'OUTGOING' ? 'FINDING FREQUENCY...' : 'INCOMING TRANSMISSION'}
+                                <p className="text-red-500 font-mono text-xl uppercase mt-8 animate-pulse tracking-[0.3em] flicker">
+                                    {status === 'ACTIVE' ? 'SIGNAL CONNECTED' : status === 'OUTGOING' ? 'SENDING SIGNAL...' : 'CONNECTING...'}
                                 </p>
                             </div>
                         )}
+
                         {/* Local Video (PiP) */}
                         {localStream && isVideo && !isCameraOff && (
-                            <div className="absolute top-6 right-6 w-32 h-48 sm:w-48 sm:h-64 bg-black border-2 border-red-800 z-20 shadow-2xl">
-                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1] grayscale contrast-125" />
+                            <div className="absolute top-6 right-6 w-32 h-48 sm:w-48 sm:h-64 bg-black border-2 border-red-900 z-20 shadow-2xl">
+                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1] opacity-90 contrast-125 sepia-[0.3]" />
                             </div>
                         )}
+
                         {/* Controls Overlay */}
                         <div className="absolute bottom-0 w-full p-8 pb-12 bg-gradient-to-t from-black via-black/80 to-transparent z-30 pb-safe">
                             <div className="max-w-md mx-auto">
                                 <div className="text-center mb-8">
-                                    <h3 className="text-3xl font-bold text-red-500 mb-2 font-title tracking-widest drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]">
-                                        {status === 'INCOMING' ? 'BREACH DETECTED' : status === 'OUTGOING' ? 'OPENING GATE...' : 'SHADOW WALK'}
+                                    <h3 className="text-4xl font-title text-red-500 mb-2 st-glow">
+                                        {status === 'INCOMING' ? 'INCOMING TRANSMISSION' : status === 'OUTGOING' ? 'DIALING HAWKINS...' : 'CONNECTED'}
                                     </h3>
-                                    <div className="text-gray-400 font-mono text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2">
-                                        {status === 'ACTIVE' && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>}
+                                    <div className="text-zinc-500 font-mono text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2">
+                                        {status === 'ACTIVE' && <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>}
                                         {status === 'ACTIVE' ? 'ENCRYPTED CHANNEL' : 'ESTABLISHING LINK...'}
                                     </div>
                                 </div>
+
                                 <div className="flex items-center justify-center gap-8">
                                     {status === 'INCOMING' ? (
                                         <>
                                             <button onClick={onHangup} className="flex flex-col items-center gap-2 group">
-                                                <div className="p-5 bg-black border border-red-600 text-red-600 rounded-full shadow-[0_0_20px_rgba(255,0,0,0.3)] group-hover:bg-red-900 group-hover:text-white transition-all">
+                                                <div className="p-5 bg-black border-2 border-zinc-700 text-zinc-500 rounded-full group-hover:border-red-500 group-hover:text-red-500 transition-all">
                                                     <Icon name="phone-off" size={32} />
                                                 </div>
-                                                <span className="text-xs font-bold text-red-500 uppercase tracking-wider">Close Gate</span>
+                                                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Ignore</span>
                                             </button>
+
                                             <button onClick={onAnswer} className="flex flex-col items-center gap-2 group">
-                                                <div className="p-5 bg-red-700 text-white rounded-full shadow-[0_0_30px_rgba(255,0,0,0.6)] border border-red-500 group-hover:bg-red-600 group-hover:scale-110 transition-all animate-bounce">
+                                                <div className="p-5 bg-red-700 text-black border-2 border-red-500 rounded-full shadow-[0_0_20px_rgba(255,0,0,0.5)] group-hover:bg-red-600 group-hover:scale-110 transition-all animate-bounce">
                                                     <Icon name="phone" size={32} />
                                                 </div>
-                                                <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Accept</span>
+                                                <span className="text-xs font-bold text-red-500 uppercase tracking-wider">Answer</span>
                                             </button>
                                         </>
                                     ) : (
                                         <>
-                                            <button
-                                                onClick={handleMuteClick}
-                                                className={`p-5 rounded-full transition-all border shadow-lg ${
-                                                    isMuted
-                                                        ? 'bg-red-900 border-red-500 text-white'
-                                                        : 'bg-black border-gray-700 text-gray-300 hover:border-red-500 hover:text-red-500'
+                                            <button 
+                                                onClick={handleMuteClick} 
+                                                className={`p-5 rounded-full transition-all border-2 ${
+                                                    isMuted 
+                                                        ? 'bg-red-900 border-red-600 text-white' 
+                                                        : 'bg-black border-zinc-700 text-zinc-400 hover:border-red-500 hover:text-red-500'
                                                 }`}
                                             >
                                                 <Icon key={isMuted ? "mic-off" : "mic"} name={isMuted ? "mic-off" : "mic"} size={28} />
                                             </button>
-                                           
-                                            <button onClick={onHangup} className="p-6 bg-red-700 rounded-full text-white shadow-[0_0_20px_rgba(255,0,0,0.5)] hover:bg-red-600 hover:scale-110 transition-all border-4 border-black">
+                                            
+                                            <button onClick={onHangup} className="p-6 bg-red-700 rounded-full text-black shadow-xl hover:bg-red-600 hover:scale-110 transition-all border-4 border-black">
                                                 <Icon name="phone-off" size={36} />
                                             </button>
+
                                             {isVideo && (
-                                                <button
-                                                    onClick={handleVideoClick}
-                                                    className={`p-5 rounded-full transition-all border shadow-lg ${
-                                                        isCameraOff
-                                                            ? 'bg-red-900 border-red-500 text-white'
-                                                            : 'bg-black border-gray-700 text-gray-300 hover:border-red-500 hover:text-red-500'
+                                                <button 
+                                                    onClick={handleVideoClick} 
+                                                    className={`p-5 rounded-full transition-all border-2 ${
+                                                        isCameraOff 
+                                                            ? 'bg-red-900 border-red-600 text-white' 
+                                                            : 'bg-black border-zinc-700 text-zinc-400 hover:border-red-500 hover:text-red-500'
                                                     }`}
                                                 >
                                                     <Icon key={isCameraOff ? "video-off" : "video"} name={isCameraOff ? "video-off" : "video"} size={28} />
@@ -446,6 +540,7 @@
                 </div>
             );
         };
+
         // --- CAMERA COMPONENT ---
         const CameraModal = ({ onClose, onCapture }) => {
             const videoRef = useRef(null);
@@ -456,11 +551,12 @@
             const [isRecording, setIsRecording] = useState(false);
             const [preview, setPreview] = useState(null); // { type: 'image'|'video', url, blob }
             const [timer, setTimer] = useState(0);
+
             useEffect(() => {
                 let s = null;
-                navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: true
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" }, 
+                    audio: true 
                 }).then(mediaStream => {
                     s = mediaStream;
                     setStream(mediaStream);
@@ -471,6 +567,7 @@
                 }).catch(err => console.error("Cam Access Denied", err));
                 return () => { if(s) s.getTracks().forEach(t => t.stop()); }
             }, []);
+
             useEffect(() => {
                 let interval;
                 if(isRecording) {
@@ -480,6 +577,7 @@
                 }
                 return () => clearInterval(interval);
             }, [isRecording]);
+
             const takePhoto = () => {
                 if(!videoRef.current || !canvasRef.current) return;
                 const w = videoRef.current.videoWidth;
@@ -492,6 +590,7 @@
                     setPreview({ type: 'image', url: URL.createObjectURL(blob), blob });
                 }, 'image/jpeg', 0.85);
             };
+
             const toggleVideo = () => {
                 if(isRecording) {
                     mediaRecorderRef.current.stop();
@@ -509,6 +608,7 @@
                     setIsRecording(true);
                 }
             };
+
             const handleSend = () => {
                 if(preview) {
                     const name = preview.type === 'image' ? `photo_${Date.now()}.jpg` : `video_${Date.now()}.webm`;
@@ -517,63 +617,62 @@
                     onClose();
                 }
             };
+
             const retake = () => {
                 setPreview(null);
             };
+
             return (
                 <div className="fixed inset-0 z-[60] bg-black flex flex-col app-height items-center justify-center p-4">
-                    <div className="w-full max-w-5xl h-full max-h-[90vh] flex flex-col relative bg-[#1a0505] rounded overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.2)] border-2 border-red-900">
+                    <div className="w-full max-w-5xl h-full max-h-[90vh] flex flex-col relative bg-black border-2 border-red-900 shadow-2xl overflow-hidden">
                         {/* Header */}
-                        <div className="p-4 flex justify-between items-center bg-black/50 absolute top-0 w-full z-10 pb-safe backdrop-blur-sm border-b border-red-900/30">
-                            <button onClick={onClose} className="text-red-500 bg-black/40 p-2 rounded hover:bg-red-900/40 transition-colors"><Icon name="x" /></button>
-                            {isRecording && <div className="text-red-500 font-mono font-bold animate-pulse bg-black/80 px-3 py-1 border border-red-600 tracking-widest">REC {formatTime(timer)}</div>}
+                        <div className="p-4 flex justify-between items-center bg-black/80 absolute top-0 w-full z-10 pb-safe backdrop-blur-sm border-b border-red-900/30">
+                            <button onClick={onClose} className="text-red-500 hover:text-white transition-colors"><Icon name="x" /></button>
+                            {isRecording && <div className="text-red-600 font-mono font-bold animate-pulse text-lg">● REC {formatTime(timer)}</div>}
                             <div className="w-8"></div>
                         </div>
+
                         {/* Main View */}
-                        <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
+                        <div className="flex-1 relative bg-zinc-900 flex items-center justify-center overflow-hidden">
                             {!preview ? (
                                 <>
-                                    <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover grayscale contrast-125" muted playsInline></video>
+                                    <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover sepia-[0.3] contrast-125" muted playsInline></video>
                                     <canvas ref={canvasRef} className="hidden"></canvas>
-                                    {/* Viewfinder Overlay */}
                                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-50">
-                                        <div className="w-64 h-64 border-2 border-red-500/50 relative">
-                                            <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-red-500"></div>
-                                            <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-red-500"></div>
-                                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-red-500"></div>
-                                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-red-500"></div>
-                                        </div>
+                                        <div className="w-64 h-64 border-2 border-red-500/30"></div>
+                                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                     </div>
                                 </>
                             ) : (
                                 <div className="relative w-full h-full bg-black flex items-center justify-center">
-                                    {preview.type === 'image' ?
-                                        <img src={preview.url} className="max-w-full max-h-full object-contain grayscale" alt="preview" /> :
-                                        <video src={preview.url} controls className="max-w-full max-h-full object-contain grayscale" />
+                                    {preview.type === 'image' ? 
+                                        <img src={preview.url} className="max-w-full max-h-full object-contain sepia-[0.3]" alt="preview" /> : 
+                                        <video src={preview.url} controls className="max-w-full max-h-full object-contain sepia-[0.3]" />
                                     }
                                 </div>
                             )}
                         </div>
+
                         {/* Controls */}
-                        <div className="bg-[#0a0000] border-t border-red-900 flex items-center justify-around pb-safe py-6">
+                        <div className="bg-black border-t border-red-900 flex items-center justify-around pb-safe py-6">
                             {!preview ? (
                                 <>
-                                    <div className="flex gap-4 font-mono">
-                                        <button onClick={() => setMode('PHOTO')} className={`text-sm font-bold tracking-wider ${mode === 'PHOTO' ? 'text-red-500 underline underline-offset-4' : 'text-gray-600'} hover:text-red-400 transition-colors`}>PHOTO</button>
-                                        <button onClick={() => setMode('VIDEO')} className={`text-sm font-bold tracking-wider ${mode === 'VIDEO' ? 'text-red-500 underline underline-offset-4' : 'text-gray-600'} hover:text-red-400 transition-colors`}>VIDEO</button>
+                                    <div className="flex gap-4">
+                                        <button onClick={() => setMode('PHOTO')} className={`text-lg font-mono font-bold ${mode === 'PHOTO' ? 'text-red-500 underline underline-offset-4' : 'text-zinc-600'} hover:text-red-400 transition-colors`}>PHOTO</button>
+                                        <button onClick={() => setMode('VIDEO')} className={`text-lg font-mono font-bold ${mode === 'VIDEO' ? 'text-red-500 underline underline-offset-4' : 'text-zinc-600'} hover:text-red-400 transition-colors`}>VIDEO</button>
                                     </div>
-                                    <button
+                                    <button 
                                         onClick={mode === 'PHOTO' ? takePhoto : toggleVideo}
-                                        className={`w-16 h-16 rounded-full border-4 border-gray-400 flex items-center justify-center transition-all cursor-pointer hover:border-white ${isRecording ? 'border-red-500 scale-110' : 'active:scale-95'}`}
+                                        className={`w-20 h-20 rounded-full border-4 border-zinc-700 flex items-center justify-center transition-all cursor-pointer hover:border-red-500 ${isRecording ? 'bg-red-900 scale-105' : 'bg-transparent active:scale-95'}`}
                                     >
-                                        <div className={`rounded-full transition-all ${mode === 'PHOTO' ? 'bg-white w-12 h-12' : 'bg-red-600 w-10 h-10 animate-pulse'}`}></div>
+                                        <div className={`rounded-full transition-all ${mode === 'PHOTO' ? 'bg-red-500 w-16 h-16' : 'bg-red-600 w-12 h-12'}`}></div>
                                     </button>
                                     <div className="w-12"></div>
                                 </>
                             ) : (
-                                <div className="flex w-full justify-around items-center font-mono uppercase">
-                                    <button onClick={retake} className="text-gray-400 font-bold hover:text-white transition-colors">Discard</button>
-                                    <button onClick={handleSend} className="bg-red-700 text-white px-8 py-3 font-bold text-lg hover:bg-red-600 border border-red-500 shadow-lg shadow-red-900/50">Transmit</button>
+                                <div className="flex w-full justify-around items-center">
+                                    <button onClick={retake} className="text-zinc-400 font-bold hover:text-white transition-colors uppercase font-mono tracking-wider">Retake</button>
+                                    <button onClick={handleSend} className="bg-red-700 text-black px-10 py-3 rounded-sm font-bold text-xl hover:bg-red-600 hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,0,0,0.4)] font-mono uppercase">Send</button>
                                 </div>
                             )}
                         </div>
@@ -581,6 +680,7 @@
                 </div>
             );
         };
+
         // --- MAIN APP ---
         const App = () => {
             const [view, setView] = useState('HOME');
@@ -589,20 +689,21 @@
             const [msgText, setMsgText] = useState("");
             const [messages, setMessages] = useState([]);
             const [showVerify, setShowVerify] = useState(false);
-            const [fileProgress, setFileProgress] = useState(0);
+            const [fileProgress, setFileProgress] = useState(0); 
             const [showCamera, setShowCamera] = useState(false);
             const [showEmoji, setShowEmoji] = useState(false);
-           
+            
             // Audio Recording State
             const [isRecordingAudio, setIsRecordingAudio] = useState(false);
             const [audioTimer, setAudioTimer] = useState(0);
             const audioRecorderRef = useRef(null);
             const audioChunksRef = useRef([]);
+
             // WebRTC Refs
             const pc = useRef(null);
             const dc = useRef(null);
             const candidates = useRef([]);
-           
+            
             // Crypto Refs
             const keys = useRef({ rsa: null, ecdh: null });
             const sessionKey = useRef(null);
@@ -610,10 +711,12 @@
             const incomingFiles = useRef({});
             const fileInputRef = useRef(null);
             const chatEndRef = useRef(null);
+
             // Signaling State
             const [localSignal, setLocalSignal] = useState(null);
             const scannedChunks = useRef(new Map());
             const [scanProgress, setScanProgress] = useState(0);
+
             // Call State
             const [callStatus, setCallStatus] = useState('IDLE'); // IDLE, OUTGOING, INCOMING, ACTIVE
             const [localStream, setLocalStream] = useState(null);
@@ -621,6 +724,7 @@
             const [remoteStream, setRemoteStream] = useState(null);
             const [isVideoCall, setIsVideoCall] = useState(false);
             const pendingOffer = useRef(null);
+
             // Initial Key Gen
             useEffect(() => {
                 const initKeys = async () => {
@@ -632,13 +736,15 @@
                         { name: "ECDH", namedCurve: "P-256" },
                         true, ["deriveKey", "deriveBits"]
                     );
-                    addLog("HAWKINS LAB OS v19.83 LOADED.");
+                    addLog("CRYPTO_SYSTEM_INIT...");
                 };
                 initKeys();
             }, []);
+
             useEffect(() => {
                 if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: "smooth" });
             }, [messages]);
+
             useEffect(() => {
                 let interval;
                 if(isRecordingAudio) {
@@ -648,20 +754,22 @@
                 }
                 return () => clearInterval(interval);
             }, [isRecordingAudio]);
+
             const addLog = (txt) => setLogs(p => [...p.slice(-4), txt]);
+
             // WebRTC Setup
             const createPeer = useCallback(() => {
                 const peer = new RTCPeerConnection(ICE_SERVERS);
-                peer.onicecandidate = (e) => {
+                peer.onicecandidate = (e) => { 
                     if (e.candidate) {
                         if (dc.current && dc.current.readyState === 'open') {
                              dc.current.send(JSON.stringify({ t: 'SIG_ICE', c: e.candidate }));
                         } else {
-                            candidates.current.push(e.candidate);
+                            candidates.current.push(e.candidate); 
                         }
-                    }
+                    } 
                 };
-                peer.onconnectionstatechange = () => addLog(`STATUS: ${peer.connectionState.toUpperCase()}`);
+                peer.onconnectionstatechange = () => addLog(`CONN_STATE: ${peer.connectionState.toUpperCase()}`);
                 peer.ontrack = (e) => {
                     const stream = e.streams[0] || new MediaStream([e.track]);
                     setRemoteStream(new MediaStream(stream.getTracks()));
@@ -669,21 +777,19 @@
                 pc.current = peer;
                 return peer;
             }, []);
+
             const processSignal = useCallback(async (data) => {
                 if (!pc.current) return;
                 if(role === 'HOST' && data.type === 'answer') {
                     await pc.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
                     data.candidates.forEach(c => pc.current.addIceCandidate(new RTCIceCandidate(c)));
-                    addLog("REMOTE COORDS LOCKED.");
+                    addLog("REMOTE_DESC_SET");
                 } else if (role === 'JOINER' && data.type === 'offer') {
                     await pc.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
                     data.candidates.forEach(c => pc.current.addIceCandidate(new RTCIceCandidate(c)));
                     const answer = await pc.current.createAnswer();
                     await pc.current.setLocalDescription(answer);
-                   
-                    // Match ShadowLink delay
-                    await new Promise(r => setTimeout(r, 500));
-                    addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
+                    await new Promise(r => setTimeout(r, 500)); 
                     setLocalSignal({
                         type: 'answer',
                         sdp: pc.current.localDescription,
@@ -692,12 +798,14 @@
                     setView('JOIN_WAIT');
                 }
             }, [role]);
+
             const handleScannedChunk = useCallback((raw) => {
                 const parts = raw.split(':');
                 if(parts.length < 4) return;
                 const idx = parseInt(parts[1]);
                 const total = parseInt(parts[2]);
                 const data = parts.slice(3).join(':');
+
                 if(!scannedChunks.current.has(idx)) {
                     scannedChunks.current.set(idx, data);
                     setScanProgress(Math.round((scannedChunks.current.size / total) * 100));
@@ -706,34 +814,31 @@
                         try {
                             const jsonStr = atob(fullB64);
                             const signalData = JSON.parse(jsonStr);
-                            addLog("PACKET REASSEMBLED.");
+                            addLog("SIGNAL_CAPTURED");
                             scannedChunks.current.clear();
                             processSignal(signalData);
                         } catch(e) {
                             console.error("Signal parse error", e);
-                            addLog("DECRYPTION ERROR");
+                            addLog("SIGNAL_PARSE_ERR");
                         }
                     }
                 }
             }, [processSignal]);
+
             const startHost = async () => {
                 setRole('HOST');
-                // Remove explicit reset to match ShadowLink
                 const peer = createPeer();
-                dc.current = peer.createDataChannel("upsidedown");
+                dc.current = peer.createDataChannel("shadowlink");
                 setupDataChannel(dc.current);
                 const offer = await peer.createOffer();
                 await peer.setLocalDescription(offer);
-               
-                // Match ShadowLink delay
                 await new Promise(r => setTimeout(r, 500));
-                addLog(`GATHERED ${candidates.current.length} CANDIDATES`);
                 setLocalSignal({ type: 'offer', sdp: peer.localDescription, candidates: candidates.current });
                 setView('HOST_WAIT');
             };
+
             const startJoin = () => {
                 setRole('JOINER');
-                // Remove explicit reset to match ShadowLink
                 const peer = createPeer();
                 peer.ondatachannel = (e) => {
                     dc.current = e.channel;
@@ -741,58 +846,64 @@
                 };
                 setView('SCAN_HOST');
             };
+
             const setupDataChannel = (channel) => {
                 channel.onopen = () => {
-                    addLog("GATE OPENED.");
+                    addLog("TUNNEL_OPEN");
                     initiateSecureHandshake();
                 };
                 channel.onmessage = async (e) => handlePacket(e.data);
             };
-            // Secure Handshake
+
             const initiateSecureHandshake = async () => {
                 const rsaPub = await window.crypto.subtle.exportKey("spki", keys.current.rsa.publicKey);
                 const ecdhPub = await window.crypto.subtle.exportKey("raw", keys.current.ecdh.publicKey);
                 dc.current.send(JSON.stringify({ t: 'HELLO', rsa: buf2hex(rsaPub), ecdh: buf2hex(ecdhPub) }));
             };
+
             const deriveSession = async (p) => {
                 const peerRsa = await window.crypto.subtle.importKey("spki", hex2buf(p.rsa), { name: "RSA-OAEP", hash: "SHA-256" }, true, ["encrypt"]);
                 const peerEcdh = await window.crypto.subtle.importKey("raw", hex2buf(p.ecdh), { name: "ECDH", namedCurve: "P-256" }, true, []);
-               
+                
                 const sharedBits = await window.crypto.subtle.deriveBits({ name: "ECDH", public: peerEcdh }, keys.current.ecdh.privateKey, 256);
-               
+                
                 const hkdfKey = await window.crypto.subtle.importKey("raw", sharedBits, { name: "HKDF" }, false, ["deriveKey"]);
                 sessionKey.current = await window.crypto.subtle.deriveKey(
                     { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(), info: new TextEncoder().encode("ShadowLink") },
                     hkdfKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
                 );
+
                 const localRsaExp = await window.crypto.subtle.exportKey("spki", keys.current.rsa.publicKey);
                 const remoteRsaExp = hex2buf(p.rsa);
-               
+                
                 const localArr = new Uint8Array(localRsaExp);
                 const remoteArr = new Uint8Array(remoteRsaExp);
                 let first = localArr, second = remoteArr;
-               
+                
                 for(let i=0; i<Math.min(localArr.length, remoteArr.length); i++) {
                     if (localArr[i] < remoteArr[i]) { first = localArr; second = remoteArr; break; }
                     if (localArr[i] > remoteArr[i]) { first = remoteArr; second = localArr; break; }
                 }
+
                 const totalLen = sharedBits.byteLength + first.length + second.length;
                 const combined = new Uint8Array(totalLen);
                 combined.set(new Uint8Array(sharedBits), 0);
                 combined.set(first, sharedBits.byteLength);
                 combined.set(second, sharedBits.byteLength + first.length);
+
                 const fpHash = await window.crypto.subtle.digest("SHA-256", combined);
                 const fpArr = new Uint8Array(fpHash);
-                const emojis = EMOJIS;
+                const emojis = ["🦇","💀","🌙","🕯️","🎲","📻","🧇","🚲","👹","🩸","🌲","👻","🕷️","⚡","🔥","👽"];
                 let fpEmoji = "";
                 for(let i=0; i<4; i++) fpEmoji += emojis[fpArr[i] % emojis.length];
                 const fpHex = buf2hex(fpHash).substring(0, 8).toUpperCase();
                 fingerprint.current = { emoji: fpEmoji, hex: fpHex };
-               
-                addLog(`SIGNATURE: ${fpEmoji}`);
+                
+                addLog(`SECURED: ${fpEmoji}`);
                 setView('CHAT');
-                setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `ENCRYPTED LINK ESTABLISHED` }]);
+                setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `ENCRYPTED TUNNEL ESTABLISHED` }]);
             };
+
             const handlePacket = async (raw) => {
                 try {
                     const p = JSON.parse(raw);
@@ -819,7 +930,7 @@
                         const pt = await decryptData(p.iv, p.meta);
                         const meta = JSON.parse(new TextDecoder().decode(pt));
                         incomingFiles.current[p.id] = { meta, chunks: [], receivedSize: 0, startTime: Date.now() };
-                        setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `DOWNLOADING ${meta.name}...` }]);
+                        setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `RECEIVING ${meta.name}...` }]);
                     }
                     else if (p.t === 'FILE_CHUNK') {
                         const fileCtx = incomingFiles.current[p.id];
@@ -844,19 +955,20 @@
                                     );
                                     const blob = new Blob([fileData], { type: fileCtx.meta.type });
                                     const url = URL.createObjectURL(blob);
-                                    setMessages(prev => [...prev, {
+                                    setMessages(prev => [...prev, { 
                                         id: Date.now(), type: 'FILE', text: fileCtx.meta.name, fileUrl: url, fileSize: fileCtx.meta.size, mimeType: fileCtx.meta.type
                                     }]);
                                     delete incomingFiles.current[p.id];
                                 } catch(e) {
                                     console.error("Decrypt Fail", e);
-                                    setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `DATA CORRUPTED` }]);
+                                    setMessages(prev => [...prev, { id: Date.now(), type: 'SYS', text: `DECRYPTION FAILED` }]);
                                 }
                             }
                         }
                     }
                 } catch(e) { console.error("Packet Error", e); }
             };
+
             const decryptData = async (ivHex, dataHex) => {
                 return await window.crypto.subtle.decrypt(
                     { name: "AES-GCM", iv: hex2buf(ivHex) },
@@ -864,6 +976,7 @@
                     hex2buf(dataHex)
                 );
             };
+
             const sendMessage = async () => {
                 if(!msgText.trim() || !sessionKey.current) return;
                 const txt = msgText;
@@ -877,6 +990,7 @@
                 );
                 dc.current.send(JSON.stringify({ t: 'ENC', iv: buf2hex(iv), d: buf2hex(enc) }));
             };
+
             const processAndSendFile = async (blob, fileName, fileType) => {
                  if (!sessionKey.current) return;
                 const buffer = await blob.arrayBuffer();
@@ -893,7 +1007,7 @@
                 for (let i = 0; i < totalChunks; i++) {
                     const chunk = encryptedFile.slice(offset, offset + FILE_CHUNK_SIZE);
                     const b64Chunk = arrayBufferToBase64(chunk);
-                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 10));
+                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 10)); 
                     dc.current.send(JSON.stringify({ t: 'FILE_CHUNK', id: fileId, idx: i, d: b64Chunk }));
                     offset += FILE_CHUNK_SIZE;
                     setFileProgress(Math.round(((i + 1) / totalChunks) * 100));
@@ -902,16 +1016,18 @@
                 const localUrl = URL.createObjectURL(blob);
                 setMessages(prev => [...prev, { id: Date.now(), type: 'TX_FILE', text: fileName, fileUrl: localUrl, mimeType: fileType }]);
             };
+
             const handleFileSelect = (e) => {
                 const file = e.target.files[0];
                 if (file) processAndSendFile(file, file.name, file.type);
             };
+
             // --- CALLING LOGIC ---
             const startCall = async (video = false) => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: video });
                     setLocalStream(stream);
-                    localStreamRef.current = stream;
+                    localStreamRef.current = stream; 
                     setIsVideoCall(video);
                     stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
                     const offer = await pc.current.createOffer();
@@ -920,9 +1036,10 @@
                     setCallStatus('OUTGOING');
                 } catch(e) {
                     console.error("Call Error", e);
-                    alert("Could not access camera/microphone");
+                    alert("ERR: CAMERA/MIC ACCESS DENIED");
                 }
             };
+
             const answerCall = async () => {
                 try {
                     let stream;
@@ -933,7 +1050,7 @@
                         else throw e;
                     }
                     setLocalStream(stream);
-                    localStreamRef.current = stream;
+                    localStreamRef.current = stream; 
                     stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
                     await pc.current.setRemoteDescription(new RTCSessionDescription(pendingOffer.current));
                     const answer = await pc.current.createAnswer();
@@ -942,10 +1059,12 @@
                     setCallStatus('ACTIVE');
                 } catch(e) { console.error("Answer Error", e); }
             };
+
             const endCall = () => {
                 dc.current.send(JSON.stringify({ t: 'CALL_END' }));
                 endCallCleanup();
             };
+
             const endCallCleanup = () => {
                 if(localStreamRef.current) {
                     localStreamRef.current.getTracks().forEach(t => t.stop());
@@ -956,6 +1075,7 @@
                 setRemoteStream(null);
                 setCallStatus('IDLE');
             };
+
             const toggleMute = () => {
                 if(localStreamRef.current) {
                     const audioTrack = localStreamRef.current.getAudioTracks()[0];
@@ -966,6 +1086,7 @@
                 }
                 return false;
             };
+
             const toggleVideo = () => {
                 if(localStreamRef.current) {
                     const videoTrack = localStreamRef.current.getVideoTracks()[0];
@@ -976,6 +1097,7 @@
                 }
                 return false;
             };
+
             const startAudioRecord = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -992,128 +1114,111 @@
                     setIsRecordingAudio(true);
                 } catch(e) { console.error("Mic Error", e); }
             };
+
             const stopAudioRecord = () => {
                 if(audioRecorderRef.current && isRecordingAudio) {
                     audioRecorderRef.current.stop();
                     setIsRecordingAudio(false);
                 }
             };
+
             const renderMediaContent = (m) => {
                 const type = m.mimeType || '';
-                const mediaStyle = "rounded border border-red-900 bg-black/50 mt-2 max-h-64 object-contain grayscale hover:grayscale-0 transition-all";
+                const mediaStyle = "rounded-sm max-h-64 w-auto object-contain mt-2 border border-red-900 bg-black sepia-[0.3] contrast-125"; 
                 if (type.startsWith('image/')) {
                     return (<a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="block cursor-pointer"><img src={m.fileUrl} className={mediaStyle} alt="content" /></a>);
                 } else if (type.startsWith('video/')) {
                     return <video src={m.fileUrl} controls className={mediaStyle} />;
                 } else if (type.startsWith('audio/')) {
-                    return <div className="mt-2 w-full min-w-[200px]"><audio src={m.fileUrl} controls className="w-full h-8 opacity-70 hover:opacity-100" /></div>;
+                    return <div className="mt-2 w-full min-w-[200px]"><audio src={m.fileUrl} controls className="w-full h-8" /></div>;
                 }
-                return (<a href={m.fileUrl} download={m.text} className="mt-2 flex items-center justify-center gap-2 w-full py-2 bg-red-900/40 hover:bg-red-900 border border-red-800 text-red-200 text-xs font-bold transition-colors font-mono uppercase"><Icon name="download" size={14} /> Download Evidence</a>);
+                return (<a href={m.fileUrl} download={m.text} className="mt-2 flex items-center justify-center gap-2 w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-red-500 rounded-sm text-xs font-bold transition-colors uppercase tracking-widest border border-red-900"><Icon name="download" size={14} /> DOWNLOAD FILE</a>);
             };
+
             const renderHome = () => (
-                <div className="flex flex-col items-center justify-center app-height p-6 space-y-12 animate-fade-in app-bg">
-                    <div className="w-full max-w-2xl mx-auto space-y-10 relative z-10">
+                <div className="flex flex-col items-center justify-center app-height p-6 space-y-8 animate-fade-in relative z-10">
+                    <div className="w-full max-w-2xl mx-auto space-y-12">
                         <div className="text-center space-y-4">
-                            <div className="relative inline-block mb-4">
-                                <div className="w-24 h-24 rounded-full border-4 border-red-700 flex items-center justify-center neon-border bg-black">
-                                    <Icon name="infinity" size={48} className="text-red-500" />
-                                </div>
-                            </div>
-                            <h1 className="text-5xl md:text-6xl tracking-widest font-title stranger-text">THE UPSIDE DOWN</h1>
-                            <p className="text-red-500/70 text-sm font-mono tracking-[0.2em] uppercase">Analog Interface • P2P Gateway</p>
+                            <h1 className="text-6xl md:text-8xl font-title text-red-600 st-glow animate-pulse">UPSIDE DOWN</h1>
+                            <p className="text-red-800 text-lg font-mono tracking-[0.2em] uppercase">Secure P2P Channel</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-                            <button onClick={startHost} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60 flex items-center justify-between gap-6">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">OPEN GATE</h3>
-                                    <p className="text-xs text-gray-500 font-mono uppercase max-w-[160px]">Start a new frequency for others to find.</p>
-                                </div>
-                                <div className="opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-                                    <Icon name="radio-tower" size={56} className="text-red-600" />
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                            <button onClick={startHost} className="group relative overflow-hidden p-8 bg-transparent border-2 border-red-900 hover:border-red-500 transition-all text-left hover:shadow-[0_0_30px_rgba(255,0,0,0.4)]">
+                                <div className="absolute inset-0 bg-red-900/10 group-hover:bg-red-900/30 transition-all"></div>
+                                <h3 className="text-2xl font-bold text-red-500 flex items-center gap-3 font-title tracking-wider uppercase"><Icon name="radio-tower" size={24} /> Open The Gate</h3>
+                                <p className="text-sm text-zinc-500 mt-2 font-mono">Create a signal beacon.</p>
                             </button>
-                            <button onClick={startJoin} className="flashlight group relative overflow-hidden p-8 border-2 border-red-900 hover:border-red-500 transition-all text-left bg-black/60 flex items-center justify-between gap-6">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl font-bold text-red-500 font-title tracking-wider mb-2">FIND BREACH</h3>
-                                    <p className="text-xs text-gray-500 font-mono uppercase max-w-[160px]">Scan for existing rifts nearby.</p>
-                                </div>
-                                <div className="opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-                                    <Icon name="search" size={56} className="text-red-600" />
-                                </div>
+                            <button onClick={startJoin} className="group relative overflow-hidden p-8 bg-transparent border-2 border-zinc-800 hover:border-red-500 transition-all text-left hover:shadow-[0_0_30px_rgba(255,0,0,0.4)]">
+                                <div className="absolute inset-0 bg-zinc-900/10 group-hover:bg-red-900/30 transition-all"></div>
+                                <h3 className="text-2xl font-bold text-zinc-400 group-hover:text-red-500 flex items-center gap-3 font-title tracking-wider uppercase"><Icon name="scan-line" size={24} /> Find Signal</h3>
+                                <p className="text-sm text-zinc-500 mt-2 font-mono">Scan for a frequency.</p>
                             </button>
                         </div>
-                    </div>
-                    {/* Retro Footer */}
-                    <div className="absolute bottom-4 text-[10px] text-red-900 font-mono uppercase tracking-widest opacity-50">
-                        Hawkins National Laboratory © 1983
                     </div>
                 </div>
             );
+
             const renderSignaling = () => {
                 const isScanner = view === 'SCAN_HOST' || view === 'SCAN_JOIN';
                 const isQR = view === 'HOST_WAIT' || view === 'JOIN_WAIT';
-                const title = view === 'HOST_WAIT' ? "ACTIVE GATE" : view === 'SCAN_HOST' ? "LOCATE GATE" : view === 'SCAN_JOIN' ? "SCAN REPLY" : "YOUR REPLY";
+                const title = view === 'HOST_WAIT' ? "BROADCASTING" : view === 'SCAN_HOST' ? "SEARCHING..." : view === 'SCAN_JOIN' ? "SCAN REPLY" : "YOUR REPLY";
                 return (
-                    <div className="flex flex-col app-height p-4 items-center justify-center space-y-6 fade-in app-bg">
-                        <div className="w-full max-w-md glass-panel p-8 relative shadow-[0_0_50px_rgba(100,0,0,0.2)]">
-                            <button onClick={() => window.location.reload()} className="absolute top-0 right-0 p-4 text-red-800 hover:text-red-500 transition-all"><Icon name="x" size={20} /></button>
-                            <div className="text-center mb-8 border-b border-red-900 pb-4">
-                                <h2 className="text-3xl font-bold text-red-500 mb-2 font-title tracking-widest">{title}</h2>
-                                <p className="text-xs text-gray-500 font-mono uppercase tracking-wider">{isScanner ? "Point camera at Cerebro Signal" : "Display this signal to peer"}</p>
+                    <div className="flex flex-col app-height p-4 items-center justify-center space-y-6 fade-in relative z-10">
+                        <div className="w-full max-w-md glass-panel p-8 relative shadow-[0_0_50px_rgba(200,0,0,0.2)]">
+                            <button onClick={() => window.location.reload()} className="absolute top-4 left-4 p-2 bg-black border border-red-900 hover:bg-red-900/50 text-red-500 transition-all"><Icon name="x" size={16} /></button>
+                            <div className="text-center mb-8">
+                                <h2 className="text-3xl font-title text-red-500 st-glow mb-2">{title}</h2>
+                                <p className="text-sm text-zinc-500 font-mono tracking-widest uppercase">{isScanner ? "Align camera with signal" : "Show this code to peer"}</p>
                             </div>
                             <div className="flex justify-center min-h-[250px] items-center">
                                 {isQR && localSignal && (
                                     <div className="space-y-6 w-full">
-                                        <QRAnimator data={localSignal} label="ENCRYPTED SIGNAL" />
-                                        {view === 'HOST_WAIT' && (<button onClick={() => setView('SCAN_JOIN')} className="w-full py-4 border border-red-600 text-red-500 hover:bg-red-900/30 font-bold font-mono uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(255,0,0,0.4)]"><Icon name="scan-eye" /> I've Been Scanned</button>)}
+                                        <QRAnimator data={localSignal} label="ENCRYPTED PACKET" />
+                                        {view === 'HOST_WAIT' && (<button onClick={() => setView('SCAN_JOIN')} className="w-full py-4 bg-red-900 hover:bg-red-800 border border-red-500 text-white font-bold font-mono tracking-widest shadow-lg flex items-center justify-center gap-2 uppercase transition-all"><Icon name="scan-eye" /> Signal Received</button>)}
                                     </div>
                                 )}
                                 {isScanner && (
                                     <div className="w-full space-y-4">
                                         <QRScanner onScan={handleScannedChunk} />
-                                        {scanProgress > 0 && scanProgress < 100 && (<div className="w-full bg-black border border-red-900 h-2 overflow-hidden"><div className="h-full bg-red-600 transition-all" style={{width: `${scanProgress}%`}}></div></div>)}
+                                        {scanProgress > 0 && scanProgress < 100 && (<div className="w-full bg-black h-2 border border-red-900"><div className="h-full bg-red-600 transition-all" style={{width: `${scanProgress}%`}}></div></div>)}
                                     </div>
                                 )}
                             </div>
                         </div>
-                        <div className="font-mono text-[10px] text-red-500/50 bg-black border border-red-900/30 px-4 py-2 uppercase tracking-widest">{logs[logs.length-1] || "SYSTEM IDLE..."}</div>
+                        <div className="font-mono text-xs text-red-700 bg-black border border-red-900/50 px-4 py-2 uppercase tracking-widest blink">{logs[logs.length-1] || "SYSTEM_READY"}</div>
                     </div>
                 );
             };
+
             const renderChat = () => (
-                <div className="app-height bg-[#050505] flex flex-col overflow-hidden relative">
-                    <header className="px-6 py-4 bg-black border-b border-red-900 flex items-center justify-between shadow-lg z-10 shrink-0">
+                <div className="app-height bg-black flex flex-col overflow-hidden relative z-10">
+                    <header className="px-6 py-4 bg-zinc-900/90 backdrop-blur-md flex items-center justify-between shadow-lg z-10 shrink-0 border-b-2 border-red-900">
                         <div className="flex items-center gap-4 cursor-pointer group max-w-4xl w-full mx-auto justify-between">
                             <div className="flex items-center gap-4" onClick={() => setShowVerify(true)}>
-                                <div className="w-10 h-10 border border-red-600 bg-black flex items-center justify-center text-red-500 font-bold text-xl shadow-[0_0_10px_rgba(255,0,0,0.3)] group-hover:bg-red-900 transition-colors">
-                                    {fingerprint.current?.emoji.substring(0,2)}
-                                </div>
+                                <div className="w-12 h-12 rounded-full border-2 border-red-600 bg-black flex items-center justify-center text-red-500 font-bold text-2xl shadow-[0_0_15px_rgba(255,0,0,0.5)] group-hover:scale-110 transition-transform">{fingerprint.current?.emoji.substring(0,2)}</div>
                                 <div>
-                                    <h2 className="font-bold text-red-100 text-sm font-title tracking-wider group-hover:text-red-500 transition-colors">HAWKINS AV CLUB</h2>
-                                    <p className="text-[10px] text-red-600 font-mono tracking-widest uppercase flex items-center gap-1"><Icon name="lock" size={10} /> SECURE CHANNEL</p>
+                                    <h2 className="font-bold text-red-500 text-lg group-hover:text-white transition-colors font-title tracking-wide">HAWKINS AV CLUB</h2>
+                                    <p className="text-[10px] text-zinc-500 font-mono tracking-[0.2em] flex items-center gap-1 uppercase"><Icon name="lock" size={10} /> SECURE LINE</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => startCall(false)} disabled={callStatus !== 'IDLE'} className={`p-2 border transition-all ${callStatus !== 'IDLE' ? 'opacity-30 cursor-not-allowed border-gray-800 text-gray-500' : 'border-red-900 text-red-500 hover:bg-red-900 hover:text-white hover:border-red-500'}`}><Icon name="phone" size={18} /></button>
-                                <button onClick={() => startCall(true)} disabled={callStatus !== 'IDLE'} className={`p-2 border transition-all ${callStatus !== 'IDLE' ? 'opacity-30 cursor-not-allowed border-gray-800 text-gray-500' : 'border-red-900 text-red-500 hover:bg-red-900 hover:text-white hover:border-red-500'}`}><Icon name="video" size={18} /></button>
-                                <button onClick={() => window.location.reload()} className="p-2 text-red-800 hover:text-red-500 transition-all"><Icon name="log-out" size={18} /></button>
+                                <button onClick={() => startCall(false)} disabled={callStatus !== 'IDLE'} className={`p-3 border-2 transition-all ${callStatus !== 'IDLE' ? 'opacity-30 cursor-not-allowed border-zinc-800 text-zinc-600' : 'text-zinc-400 border-zinc-700 hover:border-red-500 hover:text-red-500 bg-black'}`}><Icon name="phone" size={20} /></button>
+                                <button onClick={() => startCall(true)} disabled={callStatus !== 'IDLE'} className={`p-3 border-2 transition-all ${callStatus !== 'IDLE' ? 'opacity-30 cursor-not-allowed border-zinc-800 text-zinc-600' : 'text-zinc-400 border-zinc-700 hover:border-red-500 hover:text-red-500 bg-black'}`}><Icon name="video" size={20} /></button>
+                                <button onClick={() => window.location.reload()} className="p-3 text-red-900 border-2 border-red-900 hover:border-red-500 hover:text-red-500 bg-black transition-all"><Icon name="log-out" size={20} /></button>
                             </div>
                         </div>
                     </header>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black relative scroll-smooth">
-                        {/* Background Texture */}
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-felt.png')] opacity-30 pointer-events-none"></div>
-                       
-                        <div className="max-w-4xl mx-auto w-full space-y-4 relative z-10">
-                            {messages.map((m) => (m.type === 'SYS' ? (<div key={m.id} className="msg-sys"><span className="sys-pill">{m.text}</span></div>) : (<div key={m.id} className={`flex ${['TX', 'TX_FILE'].includes(m.type) ? 'justify-end' : 'justify-start'} animate-fade-in`}><div className={`msg-bubble ${['TX', 'TX_FILE'].includes(m.type) ? 'msg-me' : 'msg-other'} text-sm ${['FILE', 'TX_FILE'].includes(m.type) ? 'min-w-[240px]' : 'min-w-[60px]'}`}>{['FILE', 'TX_FILE'].includes(m.type) ? (<><div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10"><Icon name={m.mimeType?.startsWith('image') ? 'image' : m.mimeType?.startsWith('video') ? 'video' : m.mimeType?.startsWith('audio') ? 'mic' : 'file'} size={14} className="opacity-70" /><span className="font-bold text-xs opacity-90 truncate max-w-[150px] font-mono uppercase">{m.text}</span></div>{renderMediaContent(m)}</>) : (m.text)}<div className="text-[9px] mt-1.5 opacity-50 text-right font-mono flex justify-end gap-1 items-center uppercase">{new Date(m.id).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}{['TX', 'TX_FILE'].includes(m.type) && <span className="text-red-500 font-bold">SENT</span>}</div></div></div>)))}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-transparent scroll-smooth font-mono">
+                        <div className="max-w-4xl mx-auto w-full space-y-4">
+                            {messages.map((m) => (m.type === 'SYS' ? (<div key={m.id} className="msg-sys"><span className="sys-pill">{m.text}</span></div>) : (<div key={m.id} className={`flex ${['TX', 'TX_FILE'].includes(m.type) ? 'justify-end' : 'justify-start'} animate-fade-in`}><div className={`msg-bubble ${['TX', 'TX_FILE'].includes(m.type) ? 'msg-me' : 'msg-other'} shadow-md ${['FILE', 'TX_FILE'].includes(m.type) ? 'min-w-[260px]' : 'min-w-[80px]'}`}>{['FILE', 'TX_FILE'].includes(m.type) ? (<><div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/20"><Icon name={m.mimeType?.startsWith('image') ? 'image' : m.mimeType?.startsWith('video') ? 'video' : m.mimeType?.startsWith('audio') ? 'mic' : 'file'} size={14} className="opacity-70" /><span className="font-bold text-xs opacity-90 truncate max-w-[180px] uppercase tracking-wider">{m.text}</span></div>{renderMediaContent(m)}</>) : (m.text)}<div className="text-[10px] mt-2 opacity-60 text-right font-mono flex justify-end gap-1 items-center uppercase tracking-widest">{new Date(m.id).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}{['TX', 'TX_FILE'].includes(m.type) && <Icon name="check" size={12} />}</div></div></div>)))}
                             <div ref={chatEndRef}></div>
                         </div>
                     </div>
-                    {showEmoji && (<div className="absolute bottom-20 left-4 bg-black border border-red-600 p-2 shadow-2xl z-20 grid grid-cols-4 gap-2 animate-fade-in">{EMOJIS.map(e => (<button key={e} onClick={() => { setMsgText(p => p + e); setShowEmoji(false); }} className="text-2xl p-2 hover:bg-red-900/30 transition-colors">{e}</button>))}</div>)}
-                    {fileProgress > 0 && (<div className="h-1 bg-black w-full shrink-0 border-t border-red-900"><div className="h-full bg-red-600 transition-all duration-100" style={{width: `${fileProgress}%`}}></div></div>)}
-                    <div className="bg-black border-t border-red-900 z-10 relative">
-                        <div className="max-w-4xl mx-auto w-full p-3 flex items-center gap-2 shrink-0 pb-safe">
-                            {!isRecordingAudio ? (<><button onClick={() => setShowEmoji(!showEmoji)} className={`p-3 transition-colors ${showEmoji ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}><Icon name="smile" size={22} /></button><button onClick={() => fileInputRef.current?.click()} className="p-3 text-gray-500 hover:text-red-500 transition-colors"><Icon name="paperclip" size={22} /><input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} /></button><div className="flex-1 bg-[#111] border border-red-900/30 flex items-center px-4 py-3 hover:border-red-600 transition-colors focus-within:border-red-500 mb-0.5"><input value={msgText} onChange={e => setMsgText(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} type="text" placeholder="Transmitting..." className="bg-transparent border-none outline-none text-red-100 w-full placeholder-gray-700 text-sm font-mono" autoComplete="off" />{msgText.length > 0 && (<button onClick={() => setShowCamera(true)} className="ml-2 text-gray-500 hover:text-red-500"><Icon name="camera" size={20} /></button>)}</div>{msgText ? (<button onClick={sendMessage} className="p-3 bg-red-800 text-white hover:bg-red-600 border border-red-500 shadow-[0_0_10px_rgba(255,0,0,0.3)] transition-all"><Icon name="send-horizontal" size={22} /></button>) : (<div className="flex gap-1"><button onClick={() => setShowCamera(true)} className="p-3 text-gray-500 hover:text-red-500 transition-colors"><Icon name="camera" size={22} /></button><button onClick={startAudioRecord} className="p-3 bg-[#111] border border-red-900/50 text-gray-400 hover:border-red-500 hover:text-red-500 transition-all"><Icon name="mic" size={22} /></button></div>)}</>) : (<div className="flex-1 flex items-center gap-4 bg-[#110000] border border-red-600 p-2.5 px-4 animate-pulse"><div className="w-3 h-3 bg-red-600 rounded-full"></div><span className="text-red-500 font-mono font-bold flex-1 tracking-widest">RECORDING {formatTime(audioTimer)}</span><button onClick={() => setIsRecordingAudio(false)} className="text-gray-500 text-xs uppercase font-bold px-3 py-1 hover:text-white">Cancel</button><button onClick={stopAudioRecord} className="p-2 bg-red-600 text-white shadow-lg pulse-ring hover:scale-110 transition-transform"><Icon name="send-horizontal" size={20} /></button></div>)}
+                    {showEmoji && (<div className="absolute bottom-20 left-4 bg-black border border-red-900 p-2 shadow-2xl z-20 grid grid-cols-4 gap-2 animate-fade-in">{EMOJIS.map(e => (<button key={e} onClick={() => { setMsgText(p => p + e); setShowEmoji(false); }} className="text-2xl p-2 hover:bg-zinc-900 rounded-sm transition-colors grayscale hover:grayscale-0">{e}</button>))}</div>)}
+                    {fileProgress > 0 && (<div className="h-2 bg-black w-full shrink-0 border-t border-red-900"><div className="h-full bg-red-600 transition-all duration-100" style={{width: `${fileProgress}%`}}></div></div>)}
+                    <div className="bg-zinc-900 border-t-2 border-red-900 z-10 relative shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+                        <div className="max-w-4xl mx-auto w-full p-4 flex items-center gap-3 shrink-0 pb-safe">
+                            {!isRecordingAudio ? (<><button onClick={() => setShowEmoji(!showEmoji)} className={`p-3 rounded-sm transition-colors border border-transparent ${showEmoji ? 'text-red-500 border-red-900 bg-black' : 'text-zinc-500 hover:text-red-500 hover:bg-black'}`}><Icon name="smile" size={24} /></button><button onClick={() => fileInputRef.current?.click()} className="p-3 rounded-sm text-zinc-500 hover:text-red-500 hover:bg-black transition-colors"><Icon name="paperclip" size={24} /><input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} /></button><div className="flex-1 bg-black border border-zinc-700 rounded-sm flex items-center px-4 py-3 hover:border-red-500 transition-colors focus-within:ring-1 focus-within:ring-red-500 shadow-inner"><input value={msgText} onChange={e => setMsgText(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} type="text" placeholder="TRANSMIT MESSAGE..." className="bg-transparent border-none outline-none text-red-100 w-full placeholder-zinc-700 text-lg font-mono uppercase" autoComplete="off" />{msgText.length > 0 && (<button onClick={() => setShowCamera(true)} className="ml-2 text-zinc-600 hover:text-red-500"><Icon name="camera" size={20} /></button>)}</div>{msgText ? (<button onClick={sendMessage} className="p-3 bg-red-800 text-black border border-red-600 hover:bg-red-600 hover:scale-105 transition-all"><Icon name="send-horizontal" size={24} /></button>) : (<div className="flex gap-2"><button onClick={() => setShowCamera(true)} className="p-3 text-zinc-500 hover:text-red-500 hover:bg-black transition-colors border border-transparent hover:border-red-900"><Icon name="camera" size={24} /></button><button onClick={startAudioRecord} className="p-3 bg-zinc-800 text-zinc-400 hover:bg-red-900 hover:text-red-100 transition-all border border-zinc-700 hover:border-red-500"><Icon name="mic" size={24} /></button></div>)}</>) : (<div className="flex-1 flex items-center gap-4 bg-black border border-red-500 p-3 animate-pulse"><div className="w-3 h-3 bg-red-600 rounded-full animate-ping"></div><span className="text-red-500 font-mono font-bold flex-1 tracking-widest text-lg">RECORDING {formatTime(audioTimer)}</span><button onClick={() => setIsRecordingAudio(false)} className="text-zinc-500 text-xs uppercase font-bold px-4 py-2 hover:text-white hover:bg-zinc-900 border border-zinc-700">CANCEL</button><button onClick={stopAudioRecord} className="p-2 bg-red-600 text-black shadow-lg hover:scale-110 transition-transform"><Icon name="send-horizontal" size={24} /></button></div>)}
                         </div>
                     </div>
                     {showVerify && fingerprint.current && (<IdentityModal fingerprint={fingerprint.current} onClose={() => setShowVerify(false)} />)}
@@ -1121,10 +1226,12 @@
                     {callStatus !== 'IDLE' && (<CallOverlay status={callStatus} localStream={localStream} remoteStream={remoteStream} isVideo={isVideoCall} onAnswer={answerCall} onHangup={endCall} onToggleMute={toggleMute} onToggleVideo={toggleVideo} />)}
                 </div>
             );
-            if(view === 'HOME') return <><SporeEffect />{renderHome()}</>;
-            if(view === 'CHAT') return <><SporeEffect />{renderChat()}</>;
-            return <><SporeEffect />{renderSignaling()}</>;
+
+            if(view === 'HOME') return <><div className="atmosphere"><div className="grain"></div><div className="vignette"></div></div><AshParticles />{renderHome()}</>;
+            if(view === 'CHAT') return <><div className="atmosphere"><div className="grain"></div><div className="vignette"></div></div>{renderChat()}</>;
+            return <><div className="atmosphere"><div className="grain"></div><div className="vignette"></div></div>{renderSignaling()}</>;
         };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
